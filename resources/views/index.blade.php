@@ -76,11 +76,12 @@
 
         <div id="movie"><?php
 
-if ($movieArray) {
-    foreach ($movieArray['results'] as $record) {
-        $title = $record['title'];
-        echo '<div class="alert alert-success" role="alert">' . $title . '</div>';
-    }
+if (count($movieArray) != 0) {
+        foreach ($movieArray as $record) {
+            $title = $record['title'];
+            echo '<div class="alert alert-success" role="alert">' . $title . '</div>';
+        }
+    
 } elseif ($error) {
     echo '<div class="alert alert-danger" role="alert">
   ' .
