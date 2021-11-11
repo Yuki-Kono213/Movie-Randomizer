@@ -9,88 +9,99 @@
 
     <title>movie Search</title>
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css"
-        integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
-
-    <style type="text/css">
-        html {
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-            background-size: cover;
-        }
-
-        body {
-
-            background: none;
-
-        }
-
-        .container {
-
-            text-align: center;
-            margin-top: 100px;
-            width: 450px;
-
-        }
-
-        input {
-
-            margin: 20px 0;
-
-        }
-
-        #movie {
-
-            margin-top: 15px;
-
-        }
-
-    </style>
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
 </head>
 
 <body>
 
     <div class="container">
+        <div class="article">
 
-        <h1>What's The movie?</h1>
+            <div class="side">
+                <h1>What's The movie?</h1>
 
 
 
-        <form>
-            <fieldset class="form-group">
-                <label for="movie_title">Enter the name of a title.</label>
-                <input type="text" class="form-control" name="movie_title" id="movie_title" placeholder="映画のタイトル"
-                    value="<?php
-                    
-                    if (array_key_exists('movie_title', $_GET)) {
-                        echo $_GET['movie_title'];
+                <form>
+                    <fieldset class="form-group">
+                        <label for="movie_title">Enter the name of a title.</label>
+                        <input type="text" class="form-control" name="movie_title" id="movie_title" placeholder="映画のタイトル"
+                            value="<?php
+                            
+                            if (array_key_exists('movie_title', $_GET)) {
+                                echo $_GET['movie_title'];
+                            }
+                            
+                            ?>">
+                        <input type="text" class="form-control" name="minimum_time" id="minimum_time" placeholder="最小上映時間"
+                            value={{ $minimum_time }}>
+                        <input type="text" class="form-control" name="max_time" id="max_time" placeholder="最長上映時間"
+                            value={{ $max_time }}>
+                        @for ($i = 0; $i < 3; $i++)
+                            <select name='age'>
+                                <option value='0'>指定なし</option>
+                                <option value='28'>アクション</option>
+                                <option value='12'>アドベンチャー</option>
+                                <option value='16'>アニメーション</option>
+                                <option value='35'>コメディ</option>
+                                <option value='80'>犯罪</option>
+                                <option value='99'>ドキュメンタリー</option>
+                                <option value='18'>ドラマ</option>
+                                <option value='10751'>ファミリー</option>
+                                <option value='14'>ファンタジー</option>
+                                <option value='36'>歴史</option>
+                                <option value='27'>ホラー</option>
+                                <option value='10402'>ミュージック</option>>
+                                <option value='9648'>ミステリー</option>
+                                <option value='10749'>ロマンス</option>
+                                <option value='878'>SF</option>>
+                                <option value='10770'>TV映画</option>
+                                <option value='53'>スリラー</option>
+                                <option value='10752'>戦争</option>
+                                <option value='37'>西部劇</option>
+                            </select>
+                        @endfor
+                        <input type="text" class="form-control" name="minimum_age" id="minimum_age" placeholder="最小上映年"
+                            value={{ $minimum_age }}>
+                        <input type="text" class="form-control" name="max_age" id="max_age" placeholder="最大上映年"
+                            value={{ $max_age }}>
+
+                        <input type="text" class="form-control" name="minimum_vote" id="minimum_vote" placeholder="最小評価"
+                            value={{ $minimum_vote }}>
+                        <input type="text" class="form-control" name="max_vote" id="max_vote" placeholder="最大評価"
+                            value={{ $max_vote }}>
+                    </fieldset>
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+
+                    <div>
+                        この製品は、TMDB APIを使用しますが、TMDBによって承認または認定されていません。
+                    </div>
+                </form>
+
+
+            </div>
+            <div class="content">
+                <div id="movie"><?php
+
+                    if (count($movieArray) != 0) {
+                        foreach ($movieArray as $record) {
+                            $title = $record['title'];
+                            echo '<div class="alert alert-success" role="alert">' . $title . '</div>';
+                        }
+                    } elseif ($error) {
+                        echo '<div class="alert alert-danger" role="alert">
+                                ' .
+                            $error .
+                            '
+                                </div>';
                     }
-                    
-                    ?>">
-            </fieldset>
 
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-
-        <div id="movie"><?php
-
-if (count($movieArray) != 0) {
-        foreach ($movieArray as $record) {
-            $title = $record['title'];
-            echo '<div class="alert alert-success" role="alert">' . $title . '</div>';
-        }
-    
-} elseif ($error) {
-    echo '<div class="alert alert-danger" role="alert">
-  ' .
-        $error .
-        '
-</div>';
-}
-
-?></div>
+                    ?>
+                </div>
+            </div>
+    </div>
     </div>
 
     <!-- jQuery first, then Bootstrap JS. -->

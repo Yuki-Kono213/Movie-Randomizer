@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise;
@@ -22,8 +23,35 @@ class APIController extends Controller
         $error = "";
         $movieArray = [];
         $bodies = [];
+        $minimum_time = 0;
+        $max_time = 180;
+        $minimum_age = 1990;
+        $max_age = date('Y');
+        $minimum_vote = 70;
+        $max_vote = 100;
         if (array_key_exists('movie_title', $_GET) && $_GET['movie_title'] != "") {
             $url_Contents = [];
+            if (array_key_exists('minimum_time', $_GET) && $_GET['minimum_time'] != "") {
+                $minimum_time = $_GET['minimum_time'];
+            }
+
+            if (array_key_exists('max_time', $_GET) && $_GET['max_time'] != "") {
+                $max_time = $_GET['max_time'];
+            }
+            if (array_key_exists('minimum_age', $_GET) && $_GET['minimum_age'] != "") {
+                $minimum_age = $_GET['minimum_age'];
+            }
+
+            if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "") {
+                $max_age = $_GET['max_age'];
+            }
+            if (array_key_exists('minimum_vote', $_GET) && $_GET['minimum_vote'] != "") {
+                $minimum_vote = $_GET['minimum_vote'];
+            }
+
+            if (array_key_exists('max_vote', $_GET) && $_GET['max_vote'] != "") {
+                $max_vote = $_GET['max_vote'];
+            }
             // $url_Contents =   $client->request('GET',"https://api.themoviedb.org/3/discover/movie?api_key=". $apikey ."&with_genres=27");
             $url_Contents =  $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" . $_GET['movie_title'] . "&page=1&include_adult=false");
             $PageArray = json_decode($url_Contents->getBody()->getContents(), true);
@@ -39,13 +67,12 @@ class APIController extends Controller
                     };
                 }
             };
-
-            $contents = [];
+            $randArray = $this->totalPageRandomizer($totalpage);
             $firstpool = new Pool($client, $firstrequests(), [
-                'concurrency' => 100,
-                'fulfilled' => function (ResponseInterface $response, $index) use(&$movieArray) {
+                'concurrency' => 25,
+                'fulfilled' => function (ResponseInterface $response, $index) use (&$movieArray) {
                     $contents = $response->getBody()->getContents();
-                    $pageArray = json_decode((string)$contents,true);
+                    $pageArray = json_decode((string)$contents, true);
                     $movieArray[$pageArray['page']] = $pageArray;
                 },
                 'rejected' => function ($reason, $index) {
@@ -54,49 +81,36 @@ class APIController extends Controller
             ]);
             $promise = $firstpool->promise();
             $promise->wait();
-            // $responses = $promise;
-            // foreach ($responses as $response) {
-
-            //     $response = json_decode($response->getBody()->getContents(), true);
-            //     $movieArray[] = $response;
-            // }
-            // for ($i = 1; $i <= $totalpage; $i++) {
-            //     foreach ($movieArray[$i]['results'] as $record) {
-            //         $promises[] = $client->requestAsync('GET',"https://api.themoviedb.org/3/movie/" . $record['id'] . "?api_key=" . $apikey . "&language=ja-JA",
-            //         [ 'on_stats' => function ($stats) { dump($stats->getTransferTime()); } ]
-            //         )->then(
-            //             function ($res) use($i) {
-            //                 dump("ok $i");
-            //             },
-            //             function ($res) use($i) {
-            //                 dump("ng $i");
-            //             });
-            //         // $detail =  json_decode($tmp->getBody()->getContents(), true);
-            //         // if ((int)$detail['runtime'] < 100) {
-
-            //         //     unset($movieArray[$i]['results'][$j]);
-            //         // }
-            //     }
-
-            // }
-            $requests = function ($movieArray, $totalpage, $apikey) use ($client) {
-                for ($i = 1; $i <= $totalpage; $i++) {
-                    foreach ($movieArray[$i]['results'] as $record) {
-                        yield function () use ($client, $record, $apikey) {
-                            return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $record['id'] . "?api_key=" . $apikey . "&language=ja-JA",);
-                        };
+            $requests = function ($movieArray, $totalpage, $apikey) use ($client, $max_vote, $minimum_vote, $minimum_age, $max_age, $randArray) {
+                $find = 0;
+                for ($i = 0; $i < $totalpage; $i++) {
+                    $page = $randArray[$i];
+                    foreach ($movieArray[$page]['results'] as $record) {
+                        if (($find == $page || $find == 0) &&
+                            $record['vote_average'] * 10 <= $max_vote && $record['vote_average'] * 10 >= $minimum_vote
+                            && (array_key_exists('release_date', $record)) && date('Y', strtotime($record['release_date'])) <= $max_age && date('Y', strtotime($record['release_date'])) >= $minimum_age
+                        ) {
+                            $find = $page;
+                            yield function () use ($client, $record, $apikey) {
+                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $record['id'] . "?api_key=" . $apikey . "&language=ja-JA",);
+                            };
+                        }
                     }
                 }
             };
 
             $pool = new Pool($client, $requests($movieArray, $totalpage, $apikey), [
-                'concurrency' => 100,
-                'fulfilled' => function (ResponseInterface $response, $index) use(&$bodies){
-                    $contents = $response->getBody()->getContents();
-                    $pageArray = json_decode((string)$contents,true);
-                    if ($pageArray['runtime']< 80) {
-                        $bodies[] = $pageArray;
+                'concurrency' => 25,
+                'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies, $minimum_time, $max_time) {
+                    if ($response != null) {
+                        $contents = $response->getBody()->getContents();
+                        $pageArray = json_decode((string)$contents, true);
+                        if ($pageArray['runtime'] <= $max_time && $pageArray['runtime'] >= $minimum_time) {
+                            $bodies[] = $pageArray;
+                        }
                     }
+                },
+                'rejected' => function ($reason, $index) {
                 },
             ]);
             $promise = $pool->promise();
@@ -112,6 +126,35 @@ class APIController extends Controller
             //     }
             // }
         }
-        return view('index', ['movieArray' => $bodies, 'error' => $error]);
+        return view('index', [
+            'movieArray' => $bodies, 'error' => $error, 'minimum_time' => $minimum_time, 'max_time' => $max_time, 'minimum_age' => $minimum_age, 'max_age' => $max_age, 'minimum_vote' => $minimum_vote, 'max_vote' => $max_vote
+        ]);
+    }
+
+    function totalPageRandomizer($totalpage)
+    {
+        /** 乱数用配列 */
+        $rands = [];
+        /** 乱数の範囲は1～10 */
+        $min = 1;
+        $max = $totalpage;
+
+        for ($i = $min; $i <= $max; $i++) {
+            while (true) {
+                /** 一時的な乱数を作成 */
+                $tmp = mt_rand($min, $max);
+
+                /*
+     * 乱数配列に含まれているならwhile続行、 
+     * 含まれてないなら配列に代入してbreak 
+     */
+                if (!in_array($tmp, $rands)) {
+                    array_push($rands, $tmp);
+                    break;
+                }
+            }
+        }
+
+        return $rands;
     }
 }
