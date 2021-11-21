@@ -34,10 +34,12 @@
                             }
                             
                             ?>">
+                            <div>上映時間</div>
                         <input type="text" class="form-control" name="minimum_time" id="minimum_time" placeholder="最小上映時間"
                             value={{ $minimum_time }}>
                         <input type="text" class="form-control" name="max_time" id="max_time" placeholder="最長上映時間"
                             value={{ $max_time }}>
+                            <div>ジャンル</div>
                         @for ($i = 0; $i < 3; $i++)
                             <select name='age'>
                                 <option value='0'>指定なし</option>
@@ -62,17 +64,25 @@
                                 <option value='37'>西部劇</option>
                             </select>
                         @endfor
+                        <div>上映年</div>
                         <input type="text" class="form-control" name="minimum_age" id="minimum_age" placeholder="最小上映年"
                             value={{ $minimum_age }}>
                         <input type="text" class="form-control" name="max_age" id="max_age" placeholder="最大上映年"
                             value={{ $max_age }}>
-
+                        <div>評価</div>
                         <input type="text" class="form-control" name="minimum_vote" id="minimum_vote" placeholder="最小評価"
                             value={{ $minimum_vote }}>
                         <input type="text" class="form-control" name="max_vote" id="max_vote" placeholder="最大評価"
                             value={{ $max_vote }}>
                     </fieldset>
-
+                    <div>候補数</div>
+                    <select name='count'>
+                        <option value='1'>1</option>
+                        <option value='2'>2</option>
+                        <option value='3'>3</option>
+                        <option value='4'>4</option>
+                        <option value='5'>5</option>
+                    </select>
                     <button type="submit" class="btn btn-primary">Submit</button>
 
                     <div>
@@ -83,22 +93,25 @@
 
             </div>
             <div class="content">
-                <div id="movie"><?php
+                <div id="movie">
+                    
+                    @if (count($movieArray) != 0) 
+                        @for($i = 0; $i < $count; $i++)
+                        <?php 
+                            echo $imgtxt[$i];
+                        ?>
 
-                    if (count($movieArray) != 0) {
-                        foreach ($movieArray as $record) {
-                            $title = $record['title'];
-                            echo '<div class="alert alert-success" role="alert">' . $title . '</div>';
-                        }
-                    } elseif ($error) {
-                        echo '<div class="alert alert-danger" role="alert">
-                                ' .
-                            $error .
-                            '
-                                </div>';
-                    }
+                        <div class="alert alert-success" role="alert">{{$movieData[$i]['title']}}</div>
+                        @endfor
+                    @elseif ($movieArray != null) 
+                        映画が見つかりませんでした。
+                    @elseif ($error) 
+                        <div class="alert alert-danger" role="alert">
+                            {{$error}} 
+                        </div>;
+                    @endif
 
-                    ?>
+                    
                 </div>
             </div>
     </div>
