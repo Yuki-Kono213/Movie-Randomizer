@@ -23,6 +23,7 @@ class APIController extends Controller
         $error = "";
         $movieArray = [];
         $bodies = [];
+        $explain = [];
         $minimum_time = 0;
         $max_time = 180;
         $minimum_age = 1990;
@@ -89,16 +90,15 @@ class APIController extends Controller
             $promise = $firstpool->promise();
             $promise->wait();
             $find = 0;
-            $requests = function ($movieArray, $totalpage, $apikey, &$find) use ($client, $max_vote, $minimum_vote, $minimum_age, $max_age, $randArray) {
+            $requests = function ($movieArray, $totalpage, $apikey, &$find) use ($client, $max_vote, $minimum_vote, $minimum_age, $max_age, $randArray, $count) {
                 
                 for ($i = 0; $i < $totalpage; $i++) {
                     $page = $randArray[$i];
                     foreach ($movieArray[$page]['results'] as $record) {
-                        if ($find <= 5 &&
+                        if ($find <= $count &&
                             $record['vote_average'] * 10 <= $max_vote && $record['vote_average'] * 10 >= $minimum_vote
                             && (array_key_exists('release_date', $record)) && date('Y', strtotime($record['release_date'])) <= $max_age && date('Y', strtotime($record['release_date'])) >= $minimum_age
                         ) {
-                            var_dump($find);
                             yield function () use ($client, $record, $apikey) {
                                 return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $record['id'] . "?api_key=" . $apikey . "&language=ja-JA",);
                             };
@@ -109,14 +109,13 @@ class APIController extends Controller
 
             $pool = new Pool($client, $requests($movieArray, $totalpage, $apikey, $find), [
                 'concurrency' => 25,
-                'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies, $minimum_time, $max_time, &$find) {
+                'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies,&$explain, $minimum_time, $max_time, &$find, $client, $apikey) {
                     if ($response != null) {
                         $contents = $response->getBody()->getContents();
                         $pageArray = json_decode((string)$contents, true);
                         if ($pageArray['runtime'] <= $max_time && $pageArray['runtime'] >= $minimum_time) {
                             $find++;
                             $bodies[] = $pageArray;
-                            
                         }
                     }
                 },
@@ -140,6 +139,11 @@ class APIController extends Controller
                 for($i = 0; $i < $count; $i++)
                 {
                     $movieData[] = $bodies[$rndArray[$i]];
+                    $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=". $apikey."&language=ja-JA&query=".$bodies[$rndArray[$i]]['title']."&page=1&include_adult=false");
+                   
+                    $contents = $response->getBody()->getContents();
+                    $contents = json_decode((string)$contents, true);
+                    $explain[] = $contents['results'][0]['overview'];
                     if(isset($bodies[$rndArray[$i]]['poster_path'])){
                         $data = file_get_contents("https://image.tmdb.org/t/p/w185".$bodies[$rndArray[$i]]['poster_path']);
                         $enc_img = base64_encode($data);
@@ -149,7 +153,7 @@ class APIController extends Controller
                         $imgtxt[] = '<img src="data:' . $imginfo['mime'] . ';base64,'.$enc_img.'">';
                     }
                     else{
-                        $imgtxt[] = "";
+                        $imgtxt[] = '<img src="/img/noimage.png">';
                     }
                 }
             }
@@ -160,7 +164,7 @@ class APIController extends Controller
         }
         return view('index', [
             'movieArray' => $bodies, 'error' => $error, 'minimum_time' => $minimum_time, 'max_time' => $max_time, 'minimum_age' => $minimum_age, 'max_age' => $max_age, 'minimum_vote' => $minimum_vote, 'max_vote' => $max_vote
-            ,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'count' => $count
+            ,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'count' => $count, 'explain' => $explain
         ]);
     }
 

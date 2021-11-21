@@ -102,6 +102,7 @@
                         ?>
 
                         <div class="alert alert-success" role="alert">{{$movieData[$i]['title']}}</div>
+                        <div class="alert alert-success" role="alert">{{$explain[$i]}}</div>
                         @endfor
                     @elseif ($movieArray != null) 
                         映画が見つかりませんでした。
