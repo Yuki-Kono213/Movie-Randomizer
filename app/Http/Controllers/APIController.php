@@ -148,6 +148,9 @@ class APIController extends Controller
         
                         $imgtxt[] = '<img src="data:' . $imginfo['mime'] . ';base64,'.$enc_img.'">';
                     }
+                    else{
+                        $imgtxt[] = "";
+                    }
                 }
             }
             else
