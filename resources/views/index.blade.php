@@ -36,9 +36,9 @@
                             ?>">
                             <div>上映時間</div>
                         <input type="text" class="form-control" name="minimum_time" id="minimum_time" placeholder="最小上映時間"
-                            value={{ $minimum_time }}>
+                            value={{ $config['minimum_time'] }}>
                         <input type="text" class="form-control" name="max_time" id="max_time" placeholder="最長上映時間"
-                            value={{ $max_time }}>
+                            value={{ $config['max_time'] }}>
                             <div>ジャンル</div>
                         @for ($i = 0; $i < 3; $i++)
                             <select id="genre{{$i}}" name="genre{{$i}}">
@@ -58,17 +58,17 @@
                         @endfor
                         <div>上映年</div>
                         <input type="text" class="form-control" name="minimum_age" id="minimum_age" placeholder="最小上映年"
-                            value={{ $minimum_age }}>
+                            value={{ $config['minimum_age'] }}>
                         <input type="text" class="form-control" name="max_age" id="max_age" placeholder="最大上映年"
-                            value={{ $max_age }}>
+                            value={{ $config['max_age']}}>
                         <div>評価</div>
                         <input type="text" class="form-control" name="minimum_vote" id="minimum_vote" placeholder="最小評価"
-                            value={{ $minimum_vote }}>
+                            value={{ $config['minimum_vote'] }}>
                         <input type="text" class="form-control" name="max_vote" id="max_vote" placeholder="最大評価"
-                            value={{ $max_vote }}>
+                            value={{ $config['max_vote'] }}>
                         <div>レビュー投稿数</div> 
                         <input type="text" class="form-control" name="min_vote_count" id="min_vote_count" placeholder="最小レビュー数"
-                            value={{ $min_vote_count }}>
+                            value={{ $config['min_vote_count']}}>
                     </fieldset>
                     <div>候補数</div>
                     <select name='count'>
@@ -100,6 +100,7 @@
                         <span class="alert alert-success" role="alert">平均評価{{$explain[$i]['results'][0]['vote_average']}}</span>
                         <span class="alert alert-success" role="alert">上映年{{$explain[$i]['results'][0]['release_date']}}</span>
                         <div class="alert alert-success" role="alert">上映時間{{$movieData[$i]['runtime']}}分</div>
+                        <span class="alert alert-success" role="alert">評価数{{$explain[$i]['results'][0]['vote_count']}}</span>
                         <div class="alert alert-success" role="alert">{{$explain[$i]['results'][0]['overview']}}</div>
                         @endfor
                     @elseif ($movieData != null && $movieData[0] == "なし") 

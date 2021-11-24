@@ -25,45 +25,46 @@ class APIController extends Controller
         $movieArray = [];
         $bodies = [];
         $explain = [];
-        $minimum_time = 0;
-        $max_time = 180;
-        $minimum_age = 1990;
-        $max_age = date('Y');
-        $minimum_vote = 70;
-        $max_vote = 100;
-        $min_vote_count = 100;
+        $config = [];
+        $config['minimum_time'] = 0;
+        $config['max_time']  = 180;
+        $config['minimum_age']  = 1990;
+        $config['max_age']  = date('Y');
+        $config['minimum_vote']  = 70;
+        $config['max_vote'] = 100;
+        $config['min_vote_count'] = 100;
         $movieData = [];
         $imgtxt = [];
         $genre = [];
         $selectedvalue = $this->InitializedValue();
         $genreArray = $this->ArrayReturn();
-        $count = 0;
+        $config['count'] = 0;
         if (array_key_exists('movie_title', $_GET) && $_GET['movie_title'] != "") {
             $url_Contents = [];
             if (array_key_exists('minimum_time', $_GET) && $_GET['minimum_time'] != "") {
-                $minimum_time = $_GET['minimum_time'];
+                $config['$minimum_time'] = $_GET['minimum_time'];
             }
 
             if (array_key_exists('max_time', $_GET) && $_GET['max_time'] != "") {
-                $max_time = $_GET['max_time'];
+                $config['max_time'] = $_GET['max_time'];
             }
             if (array_key_exists('minimum_age', $_GET) && $_GET['minimum_age'] != "") {
-                $minimum_age = $_GET['minimum_age'];
+                $config['minimum_age'] = $_GET['minimum_age'];
             }
 
             if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "") {
-                $max_age = $_GET['max_age'];
+                $config['max_age'] = $_GET['max_age'];
             }
             if (array_key_exists('minimum_vote', $_GET) && $_GET['minimum_vote'] != "") {
-                $minimum_vote = $_GET['minimum_vote'];
+                $config['minimum_vote'] = $_GET['minimum_vote'];
             }
 
             if (array_key_exists('max_vote', $_GET) && $_GET['max_vote'] != "") {
-                $max_vote = $_GET['max_vote'];
+                $config['max_vote'] = $_GET['max_vote'];
             }
 
             if (array_key_exists('count', $_GET) && $_GET['count'] != "") {
-                $count = $_GET['count'];
+                $config['count'] = $_GET['count'];
             }
             
             for($i =0; $i < 3; $i++){
@@ -103,14 +104,14 @@ class APIController extends Controller
             $promise = $firstpool->promise();
             $promise->wait();
             $find = 0;
-            $requests = function ($movieArray, $totalpage, $apikey, &$find) use ($client, $max_vote, $minimum_vote, $minimum_age, $max_age, $randArray, $count, $genre, $min_vote_count) {
+            $requests = function ($movieArray, $totalpage, $apikey, &$find) use ($client, $config, $randArray, $genre) {
                 
                 for ($i = 0; $i < $totalpage; $i++) {
                     $page = $randArray[$i];
                     foreach ($movieArray[$page]['results'] as $record) {
-                        if ($find <= $count && $this->GenreMatchCheck($genre, $record) && $record['vote_count'] >= $min_vote_count &&
-                            $record['vote_average'] * 10 <= $max_vote && $record['vote_average'] * 10 >= $minimum_vote
-                            && (array_key_exists('release_date', $record)) && date('Y', strtotime($record['release_date'])) <= $max_age && date('Y', strtotime($record['release_date'])) >= $minimum_age
+                        if ($find <= $config['count'] && $this->GenreMatchCheck($genre, $record) && $record['vote_count'] >= $config['min_vote_count'] &&
+                            $record['vote_average'] * 10 <= $config['max_vote'] && $record['vote_average'] * 10 >= $config['minimum_vote']
+                            && (array_key_exists('release_date', $record)) && date('Y', strtotime($record['release_date'])) <= $config['max_age'] && date('Y', strtotime($record['release_date'])) >=  $config['minimum_age']
                         ) {
                             yield function () use ($client, $record, $apikey) {
                                 return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $record['id'] . "?api_key=" . $apikey . "&language=ja-JA",);
@@ -122,11 +123,11 @@ class APIController extends Controller
 
             $pool = new Pool($client, $requests($movieArray, $totalpage, $apikey, $find), [
                 'concurrency' => 25,
-                'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies,&$explain, $minimum_time, $max_time, &$find, $client, $apikey) {
+                'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies,&$explain, $config, &$find, $client, $apikey) {
                     if ($response != null) {
                         $contents = $response->getBody()->getContents();
                         $pageArray = json_decode((string)$contents, true);
-                        if ($pageArray['runtime'] <= $max_time && $pageArray['runtime'] >= $minimum_time) {
+                        if ($pageArray['runtime'] <= $config['max_time'] && $pageArray['runtime'] >= $config['minimum_time']) {
                             $find++;
                             $bodies[] = $pageArray;
                         }
@@ -149,7 +150,8 @@ class APIController extends Controller
             // }
             if(count($bodies) > 0){
                 $rndArray = $this->totalPageRandomizer(0,count($bodies) - 1);
-                for($i = 0; $i < $count; $i++)
+                
+                for($i = 0; $i < $config['count']; $i++)
                 {
                     if($i == count($bodies))
                     {
@@ -181,8 +183,8 @@ class APIController extends Controller
             }
         }
         return view('index', [
-            'error' => $error, 'minimum_time' => $minimum_time, 'max_time' => $max_time, 'minimum_age' => $minimum_age, 'max_age' => $max_age, 'minimum_vote' => $minimum_vote, 'max_vote' => $max_vote
-            ,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'count' => $count, 'explain' => $explain, 'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'min_vote_count' =>$min_vote_count
+            'error' => $error,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
+             'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' =>$config
         ]);
     }
 
