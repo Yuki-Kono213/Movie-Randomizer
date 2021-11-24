@@ -41,27 +41,19 @@
                             value={{ $max_time }}>
                             <div>ジャンル</div>
                         @for ($i = 0; $i < 3; $i++)
-                            <select name='age'>
-                                <option value='0'>指定なし</option>
-                                <option value='28'>アクション</option>
-                                <option value='12'>アドベンチャー</option>
-                                <option value='16'>アニメーション</option>
-                                <option value='35'>コメディ</option>
-                                <option value='80'>犯罪</option>
-                                <option value='99'>ドキュメンタリー</option>
-                                <option value='18'>ドラマ</option>
-                                <option value='10751'>ファミリー</option>
-                                <option value='14'>ファンタジー</option>
-                                <option value='36'>歴史</option>
-                                <option value='27'>ホラー</option>
-                                <option value='10402'>ミュージック</option>>
-                                <option value='9648'>ミステリー</option>
-                                <option value='10749'>ロマンス</option>
-                                <option value='878'>SF</option>>
-                                <option value='10770'>TV映画</option>
-                                <option value='53'>スリラー</option>
-                                <option value='10752'>戦争</option>
-                                <option value='37'>西部劇</option>
+                            <select id="genre{{$i}}" name="genre{{$i}}">
+                            @foreach ( $genreArray as $key => $pref ) 
+                                @if ( ! empty( $selectedvalue[$i]) ) 
+                                    
+                                    @if ( $key == $selectedvalue[$i] ) 
+                                        <option value="{{$key}}" selected> {{$pref}} </option>;
+                                    @else
+                                        <option value="{{$key}}"> {{$pref}} </option>;
+                                    @endif
+                                @else 
+                                    <option value="{{$key}}"> {{$pref}} </option>;
+                                @endif
+                            @endforeach
                             </select>
                         @endfor
                         <div>上映年</div>
@@ -74,6 +66,9 @@
                             value={{ $minimum_vote }}>
                         <input type="text" class="form-control" name="max_vote" id="max_vote" placeholder="最大評価"
                             value={{ $max_vote }}>
+                        <div>レビュー投稿数</div> 
+                        <input type="text" class="form-control" name="min_vote_count" id="min_vote_count" placeholder="最小レビュー数"
+                            value={{ $min_vote_count }}>
                     </fieldset>
                     <div>候補数</div>
                     <select name='count'>
@@ -95,16 +90,19 @@
             <div class="content">
                 <div id="movie">
                     
-                    @if (count($movieArray) != 0) 
-                        @for($i = 0; $i < $count; $i++)
+                    @if ($movieData != null && $movieData[0] != "なし") 
+                        @for($i = 0; $i < count($movieData); $i++)
                         <?php 
                             echo $imgtxt[$i];
                         ?>
 
-                        <div class="alert alert-success" role="alert">{{$movieData[$i]['title']}}</div>
-                        <div class="alert alert-success" role="alert">{{$explain[$i]}}</div>
+                        <div class="alert alert-success" role="alert">{{$explain[$i]['results'][0]['title']}}</div>
+                        <span class="alert alert-success" role="alert">平均評価{{$explain[$i]['results'][0]['vote_average']}}</span>
+                        <span class="alert alert-success" role="alert">上映年{{$explain[$i]['results'][0]['release_date']}}</span>
+                        <div class="alert alert-success" role="alert">上映時間{{$movieData[$i]['runtime']}}分</div>
+                        <div class="alert alert-success" role="alert">{{$explain[$i]['results'][0]['overview']}}</div>
                         @endfor
-                    @elseif ($movieArray != null) 
+                    @elseif ($movieData != null && $movieData[0] == "なし") 
                         映画が見つかりませんでした。
                     @elseif ($error) 
                         <div class="alert alert-danger" role="alert">
