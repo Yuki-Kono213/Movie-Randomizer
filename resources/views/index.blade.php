@@ -23,7 +23,7 @@
 
 
 
-                <form>
+                <form method="$_POST">
                     <fieldset class="form-group">
                         <label for="movie_title">Enter the name of a title.</label>
                         <input type="text" class="form-control" name="movie_title" id="movie_title" placeholder="映画のタイトル"
@@ -72,11 +72,11 @@
                     </fieldset>
                     <div>候補数</div>
                     <select name='count'>
-                        <option value='1'>1</option>
-                        <option value='2'>2</option>
-                        <option value='3'>3</option>
-                        <option value='4'>4</option>
-                        <option value='5'>5</option>
+                        <option value='1' <?= $config['count'] == 1 ? 'selected' : '' ?>>1</option>
+                        <option value='2'<?= $config['count'] == 2 ? 'selected' : '' ?>>2</option>
+                        <option value='3'<?= $config['count'] == 3 ? 'selected' : '' ?>>3</option>
+                        <option value='4'<?= $config['count'] == 4 ? 'selected' : '' ?>>4</option>
+                        <option value='5'<?= $config['count'] == 5 ? 'selected' : '' ?>>5</option>
                     </select>
                     <button type="submit" class="btn btn-primary">Submit</button>
 
@@ -96,12 +96,12 @@
                             echo $imgtxt[$i];
                         ?>
 
-                        <div class="alert alert-success" role="alert">{{$explain[$i]['results'][0]['title']}}</div>
-                        <span class="alert alert-success" role="alert">平均評価{{$explain[$i]['results'][0]['vote_average']}}</span>
-                        <span class="alert alert-success" role="alert">上映年{{$explain[$i]['results'][0]['release_date']}}</span>
+                        <div class="alert alert-success" role="alert">{{$explain[$i]['title']}}</div>
+                        <span class="alert alert-success" role="alert">平均評価{{$explain[$i]['vote_average']}}</span>
+                        <span class="alert alert-success" role="alert">上映年{{$explain[$i]['release_date']}}</span>
                         <div class="alert alert-success" role="alert">上映時間{{$movieData[$i]['runtime']}}分</div>
-                        <span class="alert alert-success" role="alert">評価数{{$explain[$i]['results'][0]['vote_count']}}</span>
-                        <div class="alert alert-success" role="alert">{{$explain[$i]['results'][0]['overview']}}</div>
+                        <span class="alert alert-success" role="alert">評価数{{$explain[$i]['vote_count']}}</span>
+                        <div class="alert alert-success" role="alert">{{$explain[$i]['overview']}}</div>
                         @endfor
                     @elseif ($movieData != null && $movieData[0] == "なし") 
                         映画が見つかりませんでした。
