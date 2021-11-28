@@ -20,3 +20,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [App\Http\Controllers\APIController::class, 'index']);
 
 Route::post('/', [App\Http\Controllers\APIController::class, 'index']);
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

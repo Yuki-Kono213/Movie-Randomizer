@@ -1,0 +1,43 @@
+body {
+    font-family:'Noto Sans JP',sans-serif;
+    background-color:#f6f5f4;
+    background: none;
+ }
+ 
+ .side {
+   background-color:#ff838b;
+   width:450px;
+   text-align:center;
+   margin-left: 0px;
+ } 
+ 
+ .content {
+   background-color:#b3d874;
+   width:100% - 450px;
+   height:100%;
+   text-align:center;
+ }
+ 
+ .article {
+   display:flex;/*サイドバーとメインコンテンツを横並びにする                指定をした*/
+ }
+ html {
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+
+
+input {
+
+    margin: 20px 0;
+
+}
+
+#movie {
+
+    margin-top: 15px;
+
+}
