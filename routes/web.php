@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,9 +18,10 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
-Route::get('/', [App\Http\Controllers\APIController::class, 'index']);
+Route::get('/', [App\Http\Controllers\APIController::class, 'index'])->name('getindex');
 
 Route::post('/', [App\Http\Controllers\APIController::class, 'index']);
-Auth::routes();
 
+Route::get('/logout', [App\Http\Controllers\LogOutController::class, 'loggedOut'])->name('loggedOutRoute');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Auth::routes();

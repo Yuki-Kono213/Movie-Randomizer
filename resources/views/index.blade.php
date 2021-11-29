@@ -79,15 +79,21 @@ if (array_key_exists('movie_title', $_GET)) {
                         <option value='5' <?= $config['count'] == 5 ? 'selected' : '' ?>>5</option>
                     </select>
                     <button type="submit" class="btn btn-primary">Submit</button>
-
+                    <div>
+                        @if ($user == null)
+                            <a href="{{ route('login') }}"
+                                class="text-sm text-gray-700 dark:text-gray-500 underline">ログイン</a>
+                        @else
+                            <a href="{{ route('loggedOutRoute') }}"
+                                class="text-sm text-gray-700 dark:text-gray-500 underline">ログアウト</a>
+                        @endif
+                    </div>
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                            class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">登録</a>
+                    @endif
 
                 </form>
-                <a href="{{ route('login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">ログイン</a>
-
-                @if (Route::has('register'))
-                    <a href="{{ route('register') }}"
-                        class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">登録</a>
-                @endif
 
                 <div>
                     この製品は、TMDB APIを使用しますが、TMDBによって承認または認定されていません。
@@ -107,7 +113,8 @@ if (array_key_exists('movie_title', $_GET)) {
                             <div class="alert alert-success" role="alert">{{ $explain[$i]['title'] }}</div>
                             <span class="alert alert-success"
                                 role="alert">平均評価{{ $explain[$i]['vote_average'] }}</span>
-                            <span class="alert alert-success" role="alert">上映年{{ $explain[$i]['release_date'] }}</span>
+                            <span class="alert alert-success"
+                                role="alert">上映年{{ $explain[$i]['release_date'] }}</span>
                             <div class="alert alert-success" role="alert">上映時間{{ $movieData[$i]['runtime'] }}分</div>
                             <span class="alert alert-success" role="alert">評価数{{ $explain[$i]['vote_count'] }}</span>
                             <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>

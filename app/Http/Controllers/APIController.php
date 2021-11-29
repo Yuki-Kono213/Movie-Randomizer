@@ -10,6 +10,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Pool;
 use phpDocumentor\Reflection\Types\Context;
 use Psr\Http\Message\ResponseInterface;
+use Illuminate\Support\Facades\Auth;
 
 
 class APIController extends Controller
@@ -17,6 +18,8 @@ class APIController extends Controller
     function index()
     {
 
+        // 現在認証しているユーザーを取得
+        $user = Auth::user();
         // インスタンス作成
         $client = new Client();
         // $client = new Client(['debug' => true]); //通信内容をデバッグしたい場合
@@ -211,7 +214,7 @@ class APIController extends Controller
         }
         return view('index', [
             'error' => $error,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
-             'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' =>$config
+             'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' =>$config, 'user' => $user
         ]);
     }
 
