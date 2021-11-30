@@ -1,0 +1,12 @@
+$ cat /tmp/get_rename_sql.txt  
+CREATE DATABASE IF NOT EXISTS movie_randomizer;
+
+SELECT DISTINCT CONCAT(
+'RENAME TABLE ', 
+t.table_schema,'.', t.table_name, 
+' TO ', 
+"movie_randomizer", '.', t.table_name, 
+';' ) 
+as rename_table INTO OUTFILE "/tmp/rename_movie_randmizer_tables.sql"
+FROM information_schema.tables as t WHERE t.table_schema="movie_randmizer"
+AND t.table_type = "BASE TABLE";

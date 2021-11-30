@@ -86,7 +86,8 @@ if (array_key_exists('movie_title', $_GET)) {
                         @else
                             <a href="{{ route('loggedOutRoute') }}"
                                 class="text-sm text-gray-700 dark:text-gray-500 underline">ログアウト</a>
-                                <span>"{{$watchedMovieCount}}"</span>
+                                <a href="{{ route('loggedOutRoute') }}"
+                                class="text-sm text-gray-700 dark:text-gray-500 underline">評価した映画を表示</a>
                         @endif
                     </div>
                     @if (Route::has('register'))
