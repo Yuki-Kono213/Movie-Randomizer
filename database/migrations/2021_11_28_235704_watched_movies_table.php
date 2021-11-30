@@ -13,11 +13,11 @@ class WatchedMoviesTable extends Migration
      */
     public function up()
     {
-        Schema::create('Watched_Movies_Table', function (Blueprint $table) {
+        Schema::create('Watched_Movies', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->string('movie_name');
             $table->integer('movie_id');
+            $table->integer('movie_rate');
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ class WatchedMoviesTable extends Migration
     public function down()
     {
         //
-        Schema::dropIfExists('Watched_Movies_Table');
+        Schema::dropIfExists('Watched_Movies');
     }
 }

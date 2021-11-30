@@ -86,6 +86,7 @@ if (array_key_exists('movie_title', $_GET)) {
                         @else
                             <a href="{{ route('loggedOutRoute') }}"
                                 class="text-sm text-gray-700 dark:text-gray-500 underline">ログアウト</a>
+                                <span>"{{$watchedMovieCount}}"</span>
                         @endif
                     </div>
                     @if (Route::has('register'))
@@ -117,6 +118,21 @@ if (array_key_exists('movie_title', $_GET)) {
                                 role="alert">上映年{{ $explain[$i]['release_date'] }}</span>
                             <div class="alert alert-success" role="alert">上映時間{{ $movieData[$i]['runtime'] }}分</div>
                             <span class="alert alert-success" role="alert">評価数{{ $explain[$i]['vote_count'] }}</span>
+                            @if($user != null)
+                                <span class="alert alert-success" role="alert">ユーザー評価}
+                                    <option value='なし' <?= $config['count'] == 1 ? 'selected' : '' ?>>1</option>
+                                    <option value='1' <?= $config['count'] == 1 ? 'selected' : '' ?>>1</option>
+                                    <option value='2' <?= $config['count'] == 2 ? 'selected' : '' ?>>2</option>
+                                    <option value='3' <?= $config['count'] == 3 ? 'selected' : '' ?>>3</option>
+                                    <option value='4' <?= $config['count'] == 4 ? 'selected' : '' ?>>4</option>
+                                    <option value='5' <?= $config['count'] == 5 ? 'selected' : '' ?>>5</option>
+                                    <option value='5' <?= $config['count'] == 6 ? 'selected' : '' ?>>6</option>
+                                    <option value='1' <?= $config['count'] == 7 ? 'selected' : '' ?>>7</option>
+                                    <option value='2' <?= $config['count'] == 8 ? 'selected' : '' ?>>8</option>
+                                    <option value='3' <?= $config['count'] == 9 ? 'selected' : '' ?>>9</option>
+                                    <option value='4' <?= $config['count'] == 10 ? 'selected' : '' ?>>10</option>
+                                </span> 
+                            @endif
                             <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>
                         @endfor
                     @elseif ($movieData != null && $movieData[0] == "なし")

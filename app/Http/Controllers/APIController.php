@@ -11,6 +11,7 @@ use GuzzleHttp\Pool;
 use phpDocumentor\Reflection\Types\Context;
 use Psr\Http\Message\ResponseInterface;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Watched_Movie;
 
 
 class APIController extends Controller
@@ -42,6 +43,7 @@ class APIController extends Controller
         $selectedvalue = $this->InitializedValue();
         $genreArray = $this->ArrayReturn();
         $config['count'] = 5;
+        $WatchedMovieCount = 0;
         if (array_key_exists('movie_title', $_GET) || array_key_exists('genre0', $_GET) || array_key_exists('genre1', $_GET)  || array_key_exists('genre2', $_GET) ){
             $url_Contents = [];
             if (array_key_exists('minimum_time', $_GET) && $_GET['minimum_time'] != "") {
@@ -211,11 +213,15 @@ class APIController extends Controller
             {
                 $movieData[] = "なし";
             }
+            dd($user);
+        }
+        if($user != null){
+            $WatchedMovieCount = Watched_Movie::getWatchedMovie($user->id);
         }
         return view('index', [
             'error' => $error,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
-             'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' =>$config, 'user' => $user
-        ]);
+             'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' =>$config, 'user' => $user,
+             'watchedMovieCount' => $WatchedMovieCount        ]);
     }
 
     function ArrayReturn()
