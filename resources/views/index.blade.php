@@ -119,19 +119,37 @@ if (array_key_exists('movie_title', $_GET)) {
                             <div class="alert alert-success" role="alert">上映時間{{ $movieData[$i]['runtime'] }}分</div>
                             <span class="alert alert-success" role="alert">評価数{{ $explain[$i]['vote_count'] }}</span>
                             @if($user != null)
-                                <span class="alert alert-success" role="alert">ユーザー評価}
-                                    <option value='なし' <?= $config['count'] == 1 ? 'selected' : '' ?>>1</option>
-                                    <option value='1' <?= $config['count'] == 1 ? 'selected' : '' ?>>1</option>
-                                    <option value='2' <?= $config['count'] == 2 ? 'selected' : '' ?>>2</option>
-                                    <option value='3' <?= $config['count'] == 3 ? 'selected' : '' ?>>3</option>
-                                    <option value='4' <?= $config['count'] == 4 ? 'selected' : '' ?>>4</option>
-                                    <option value='5' <?= $config['count'] == 5 ? 'selected' : '' ?>>5</option>
-                                    <option value='5' <?= $config['count'] == 6 ? 'selected' : '' ?>>6</option>
-                                    <option value='1' <?= $config['count'] == 7 ? 'selected' : '' ?>>7</option>
-                                    <option value='2' <?= $config['count'] == 8 ? 'selected' : '' ?>>8</option>
-                                    <option value='3' <?= $config['count'] == 9 ? 'selected' : '' ?>>9</option>
-                                    <option value='4' <?= $config['count'] == 10 ? 'selected' : '' ?>>10</option>
-                                </span> 
+                                <span class="alert alert-success" role="alert">あなたの評価
+                                    @if(isset($rate[$explain[$i]['id']]))
+                                    <select name='rate'>
+                                        <option value='なし'>なし</option>
+                                        <option value='1' <?= $rate[$explain[$i]['id']] == 1 ? 'selected' : '' ?>>1</option>
+                                        <option value='2' <?= $rate[$explain[$i]['id']] == 2 ? 'selected' : '' ?>>2</option>
+                                        <option value='3' <?= $rate[$explain[$i]['id']] == 3 ? 'selected' : '' ?>>3</option>
+                                        <option value='4' <?= $rate[$explain[$i]['id']] == 4 ? 'selected' : '' ?>>4</option>
+                                        <option value='5' <?= $rate[$explain[$i]['id']] == 5 ? 'selected' : '' ?>>5</option>
+                                        <option value='6' <?= $rate[$explain[$i]['id']] == 6 ? 'selected' : '' ?>>6</option>
+                                        <option value='7' <?= $rate[$explain[$i]['id']] == 7 ? 'selected' : '' ?>>7</option>
+                                        <option value='8' <?= $rate[$explain[$i]['id']] == 8 ? 'selected' : '' ?>>8</option>
+                                        <option value='9' <?= $rate[$explain[$i]['id']] == 9 ? 'selected' : '' ?>>9</option>
+                                        <option value='10' <?= $rate[$explain[$i]['id']] == 10 ? 'selected' : '' ?>>10</option>
+                                    </select>
+                                    @else 
+                                    <select name='rate'>
+                                        <option value='なし' selected="true">なし</option>
+                                        <option value='1' >1</option>
+                                        <option value='2'>2</option>
+                                        <option value='3'>3</option>
+                                        <option value='4'>4</option>
+                                        <option value='5'>5</option>
+                                        <option value='6'>6</option>
+                                        <option value='7'>7</option>
+                                        <option value='8'>8</option>
+                                        <option value='9'>9</option>
+                                        <option value='10'>10</option>
+                                    </select>
+                                    @endif
+                                </span>
                             @endif
                             <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>
                         @endfor

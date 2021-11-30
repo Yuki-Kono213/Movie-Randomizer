@@ -16,7 +16,7 @@ class WatchedMovieTableSeeder extends Seeder
     {
         $param = [
             'user_id' => 1,
-            'movie_id' => 50,
+            'movie_id' => 122,
             'movie_rate' => 5
  
         ];

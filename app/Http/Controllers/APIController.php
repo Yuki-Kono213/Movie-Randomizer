@@ -37,6 +37,7 @@ class APIController extends Controller
         $config['minimum_vote']  = 70;
         $config['max_vote'] = 100;
         $config['min_vote_count'] = 100;
+        $rate = [];
         $movieData = [];
         $imgtxt = [];
         $genre = [];
@@ -180,11 +181,18 @@ class APIController extends Controller
                    
                     $contents = $response->getBody()->getContents();
                     $contents = json_decode((string)$contents, true);
+
+
                     if(count($contents['results']) > 1){
                         for($j = 0; $j < count($contents['results']); $j++)
                         {
                             if($contents['results'][$j]['id'] == $bodies[$rndArray[$i]]['id'])
                             {
+                                if($user != null && Watched_Movie::alreadyWatchedMovie($user->id, $contents['results'][$j]['id'] ))
+                                {
+                                    $rate[$contents['results'][$j]['id']] = Watched_Movie::alreadyWatchedMovieRate($user->id, $contents['results'][$j]['id']);
+                                
+                                }
                                 $contents = $contents['results'][$j];
                                 break;
                             }
@@ -213,7 +221,6 @@ class APIController extends Controller
             {
                 $movieData[] = "なし";
             }
-            dd($user);
         }
         if($user != null){
             $WatchedMovieCount = Watched_Movie::getWatchedMovie($user->id);
@@ -221,7 +228,7 @@ class APIController extends Controller
         return view('index', [
             'error' => $error,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
              'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' =>$config, 'user' => $user,
-             'watchedMovieCount' => $WatchedMovieCount        ]);
+             'watchedMovieCount' => $WatchedMovieCount ,'rate' =>$rate    ]);
     }
 
     function ArrayReturn()
