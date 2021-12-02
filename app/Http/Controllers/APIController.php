@@ -16,6 +16,27 @@ use App\Models\Watched_Movie;
 
 class APIController extends Controller
 {
+    public function RoutingFunc(Request $request)
+    {
+        $array = [];
+        if ($request->has('btn-MyMovie')) {
+           $array = $this->WatchedMovieView();
+           $array['config'];
+        } 
+        else
+        {
+            $array = $this->index();
+
+        }
+        
+        return view( 'index',[
+            'error' => $array['error'], 'movieData' => $array['movieData'], 'imgtxt' => $array['imgtxt'], 'explain' => $array['explain'],
+            'selectedvalue' => $array['selectedvalue'], 'genreArray' => $array['genreArray'], 'config' => $array['config'], 'user' => $array['user'],
+            'rate' => $array['rate']
+        ]);
+    }
+
+
     function index()
     {
 
@@ -30,63 +51,29 @@ class APIController extends Controller
         $bodies = [];
         $explain = [];
         $config = [];
-        $config['minimum_time'] = 0;
-        $config['max_time']  = 180;
-        $config['minimum_age']  = 1990;
-        $config['max_age']  = date('Y');
-        $config['minimum_vote']  = 70;
-        $config['max_vote'] = 100;
-        $config['min_vote_count'] = 100;
         $rate = [];
         $movieData = [];
         $imgtxt = [];
         $genre = [];
         $selectedvalue = $this->InitializedValue();
         $genreArray = $this->ArrayReturn();
-        $config['count'] = 5;
-        $WatchedMovieCount = 0;
-        if (array_key_exists('movie_title', $_GET) || array_key_exists('genre0', $_GET) || array_key_exists('genre1', $_GET)  || array_key_exists('genre2', $_GET) ){
+        $config = $this->GetConfigData();
+        if (array_key_exists('movie_title', $_GET) || array_key_exists('genre0', $_GET) || array_key_exists('genre1', $_GET)  || array_key_exists('genre2', $_GET)) {
             $url_Contents = [];
-            if (array_key_exists('minimum_time', $_GET) && $_GET['minimum_time'] != "") {
-                $config['$minimum_time'] = $_GET['minimum_time'];
-            }
 
-            if (array_key_exists('max_time', $_GET) && $_GET['max_time'] != "") {
-                $config['max_time'] = $_GET['max_time'];
-            }
-            if (array_key_exists('minimum_age', $_GET) && $_GET['minimum_age'] != "") {
-                $config['minimum_age'] = $_GET['minimum_age'];
-            }
 
-            if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "") {
-                $config['max_age'] = $_GET['max_age'];
-            }
-            if (array_key_exists('minimum_vote', $_GET) && $_GET['minimum_vote'] != "") {
-                $config['minimum_vote'] = $_GET['minimum_vote'];
-            }
-
-            if (array_key_exists('max_vote', $_GET) && $_GET['max_vote'] != "") {
-                $config['max_vote'] = $_GET['max_vote'];
-            }
-
-            if (array_key_exists('count', $_GET) && $_GET['count'] != "") {
-                $config['count'] = $_GET['count'];
-            }
             $genre = [];
-            for($i =0; $i < 3; $i++){
-                if(array_key_exists('genre'.$i, $_GET) && $_GET['genre'.$i] != 0) 
-                {
-                    $genre[] = $_GET['genre'.$i];
-                    $selectedvalue[$i] = $_GET['genre'.$i];
+            for ($i = 0; $i < 3; $i++) {
+                if (array_key_exists('genre' . $i, $_GET) && $_GET['genre' . $i] != 0) {
+                    $genre[] = $_GET['genre' . $i];
+                    $selectedvalue[$i] = $_GET['genre' . $i];
                 }
             }
             // $url_Contents =   $client->request('GET',"https://api.themoviedb.org/3/discover/movie?api_key=". $apikey ."&with_genres=27");
-            if(array_key_exists('movie_title', $_GET) && $_GET['movie_title'] != ""){
+            if (array_key_exists('movie_title', $_GET) && $_GET['movie_title'] != "") {
                 $url_Contents =  $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" . $_GET['movie_title'] . "&page=1&include_adult=false");
-            }
-            else
-            {
-                $url_Contents =  $client->request('GET',"https://api.themoviedb.org/3/discover/movie?api_key=" . $apikey . "&amp;with_genres=" . $genre[0] ."&page=1");
+            } else {
+                $url_Contents =  $client->request('GET', "https://api.themoviedb.org/3/discover/movie?api_key=" . $apikey . "&amp;with_genres=" . $genre[0] . "&page=1");
             }
             $PageArray = json_decode($url_Contents->getBody()->getContents(), true);
             $totalpage = $PageArray['total_pages'];
@@ -97,18 +84,15 @@ class APIController extends Controller
             $firstrequests = function () use ($client, $totalpage, $apikey, $genre) {
                 for ($i = 1; $i <= $totalpage; $i++) {
                     yield function () use ($client, $apikey, $i,  $genre) {
-                        if(array_key_exists('movie_title', $_GET)&& $_GET['movie_title'] != ""){
+                        if (array_key_exists('movie_title', $_GET) && $_GET['movie_title'] != "") {
                             return $client->requestAsync('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" . $_GET['movie_title'] . "&page=" . (string)$i . "&include_adult=false");
+                        } else {
+                            return $client->requestAsync('GET', "https://api.themoviedb.org/3/discover/movie?api_key=" . $apikey . "&amp;with_genres=" . $genre[0] . "&page=" . (string)$i . "&include_adult=false");
                         }
-                        else
-                        {
-                            return $client->requestAsync('GET', "https://api.themoviedb.org/3/discover/movie?api_key=" . $apikey . "&amp;with_genres=". $genre[0] . "&page=". (string)$i . "&include_adult=false");
-                        }
-
                     };
                 }
             };
-            $randArray = $this->totalPageRandomizer(1,$totalpage);
+            $randArray = $this->totalPageRandomizer(1, $totalpage);
             $firstpool = new Pool($client, $firstrequests(), [
                 'concurrency' => 25,
                 'fulfilled' => function (ResponseInterface $response, $index) use (&$movieArray) {
@@ -124,11 +108,12 @@ class APIController extends Controller
             $promise->wait();
             $find = 0;
             $requests = function ($movieArray, $totalpage, $apikey, &$find) use ($client, $config, $randArray, $genre) {
-                
+
                 for ($i = 0; $i < $totalpage; $i++) {
                     $page = $randArray[$i];
                     foreach ($movieArray[$page]['results'] as $record) {
-                        if ($find <= $config['count'] && $this->GenreMatchCheck($genre, $record) && $record['vote_count'] >= $config['min_vote_count'] &&
+                        if (
+                            $find <= $config['count'] && $this->GenreMatchCheck($genre, $record) && $record['vote_count'] >= $config['min_vote_count'] &&
                             $record['vote_average'] * 10 <= $config['max_vote'] && $record['vote_average'] * 10 >= $config['minimum_vote']
                             && (array_key_exists('release_date', $record)) && date('Y', strtotime($record['release_date'])) <= $config['max_age'] && date('Y', strtotime($record['release_date'])) >=  $config['minimum_age']
                         ) {
@@ -142,7 +127,7 @@ class APIController extends Controller
 
             $pool = new Pool($client, $requests($movieArray, $totalpage, $apikey, $find), [
                 'concurrency' => 25,
-                'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies,&$explain, $config, &$find, $client, $apikey) {
+                'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies, &$explain, $config, &$find, $client, $apikey) {
                     if ($response != null) {
                         $contents = $response->getBody()->getContents();
                         $pageArray = json_decode((string)$contents, true);
@@ -167,68 +152,169 @@ class APIController extends Controller
             //         $bodies[] = $body;
             //     }
             // }
-            if(count($bodies) > 0){
-                $rndArray = $this->totalPageRandomizer(0,count($bodies) - 1);
+            if (count($bodies) > 0) {
+                $rndArray = $this->totalPageRandomizer(0, count($bodies) - 1);
 
-                for($i = 0; $i < $config['count']; $i++)
-                {
-                    if($i == count($bodies))
-                    {
+                for ($i = 0; $i < $config['count']; $i++) {
+                    if ($i == count($bodies)) {
                         break;
                     }
                     $movieData[] = $bodies[$rndArray[$i]];
-                    $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=". $apikey."&language=ja-JA&query=".$bodies[$rndArray[$i]]['title']."&page=1&include_adult=false");
-                   
+                    $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" . $bodies[$rndArray[$i]]['title'] . "&page=1&include_adult=false");
+
                     $contents = $response->getBody()->getContents();
                     $contents = json_decode((string)$contents, true);
 
 
-                    if(count($contents['results']) > 1){
-                        for($j = 0; $j < count($contents['results']); $j++)
-                        {
-                            if($contents['results'][$j]['id'] == $bodies[$rndArray[$i]]['id'])
-                            {
-                                if($user != null && Watched_Movie::alreadyWatchedMovie($user->id, $contents['results'][$j]['id'] ))
-                                {
+                    if (count($contents['results']) > 1) {
+                        for ($j = 0; $j < count($contents['results']); $j++) {
+                            if ($contents['results'][$j]['id'] == $bodies[$rndArray[$i]]['id']) {
+                                if ($user != null && Watched_Movie::alreadyWatchedMovie($user->id, $contents['results'][$j]['id'])) {
                                     $rate[$contents['results'][$j]['id']] = Watched_Movie::alreadyWatchedMovieRate($user->id, $contents['results'][$j]['id']);
-                                
                                 }
                                 $contents = $contents['results'][$j];
                                 break;
                             }
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $contents = $contents['results'][0];
                     }
                     $explain[] = $contents;
-                    if(isset($movieData[$i]['poster_path'])){
-                        $data = file_get_contents("https://image.tmdb.org/t/p/w185".$movieData[$i]['poster_path']);
+                    if (isset($movieData[$i]['poster_path'])) {
+                        $data = file_get_contents("https://image.tmdb.org/t/p/w185" . $movieData[$i]['poster_path']);
                         $enc_img = base64_encode($data);
-        
+
                         $imginfo = getimagesize('data:application/octet-stream;base64,' . $enc_img);
-        
-                        $imgtxt[] = '<img src="data:' . $imginfo['mime'] . ';base64,'.$enc_img.'">';
-                    }
-                    else{
+
+                        $imgtxt[] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
+                    } else {
                         $imgtxt[] = '<img src="/img/noimage.png">';
                     }
-
                 }
-            }
-            else
-            {
+            } else {
                 $movieData[] = "なし";
             }
         }
-        if($user != null){
-            $WatchedMovieCount = Watched_Movie::getWatchedMovie($user->id);
+        return [
+            'error' => $error, 'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
+            'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' => $config, 'user' => $user,
+            'rate' => $rate
+        ];
+    }
+
+    function GetConfigData()
+    {
+        $config = [];
+        
+        $config['minimum_time'] = 0;
+        $config['max_time']  = 180;
+        $config['minimum_age']  = 1990;
+        $config['max_age']  = date('Y');
+        $config['minimum_vote']  = 70;
+        $config['max_vote'] = 100;
+        $config['min_vote_count'] = 100;
+        $config['count'] = 5;
+        if (array_key_exists('minimum_time', $_GET) && $_GET['minimum_time'] != "") {
+            $config['minimum_time'] = $_GET['minimum_time'];
         }
-        return view('index', [
-            'error' => $error,'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
-             'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' =>$config, 'user' => $user,
-             'watchedMovieCount' => $WatchedMovieCount ,'rate' =>$rate    ]);
+
+        if (array_key_exists('max_time', $_GET) && $_GET['max_time'] != "") {
+            $config['max_time'] = $_GET['max_time'];
+        }
+        if (array_key_exists('minimum_age', $_GET) && $_GET['minimum_age'] != "") {
+            $config['minimum_age'] = $_GET['minimum_age'];
+        }
+
+        if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "") {
+            $config['max_age'] = $_GET['max_age'];
+        }
+        if (array_key_exists('minimum_vote', $_GET) && $_GET['minimum_vote'] != "") {
+            $config['minimum_vote'] = $_GET['minimum_vote'];
+        }
+
+        if (array_key_exists('max_vote', $_GET) && $_GET['max_vote'] != "") {
+            $config['max_vote'] = $_GET['max_vote'];
+        }
+
+        if (array_key_exists('min_vote_count', $_GET) && $_GET['min_vote_count'] != "") {
+            $config['min_vote_count'] = $_GET['min_vote_count'];
+        }
+        if (array_key_exists('count', $_GET) && $_GET['count'] != "") {
+            $config['count'] = $_GET['count'];
+        }
+
+        return $config;
+    }
+
+    function WatchedMovieView()
+    {   
+         $error = null;
+        // 現在認証しているユーザーを取得
+        $user = Auth::user();
+        $client = new Client();
+        // $client = new Client(['debug' => true]); //通信内容をデバッグしたい場合
+        $apikey = "e9678255150ea732f1e1c718fd75ed6d"; //TMDbのAPIキー
+        $config = $this->GetConfigData();
+        $genre = [];
+        $rate = [];
+        $selectedvalue = [];
+        $genreArray = $this->ArrayReturn();
+        for ($i = 0; $i < 3; $i++) {
+            if (array_key_exists('genre' . $i, $_GET) && $_GET['genre' . $i] != 0) {
+                $genre[] = $_GET['genre' . $i];
+                $selectedvalue[$i] = $_GET['genre' . $i];
+            }
+        }
+        $movies = Watched_Movie::getWatchedMovie($user->id);
+
+        $i = 0;
+        foreach ($movies as $movie) {
+
+            
+            $contents = $client->request('GET', "https://api.themoviedb.org/3/movie/" . $movie->movie_id . "?api_key=" . $apikey . "&language=ja-JA", ['http_errors' => false])->getBody()->getContents();
+            
+            $pageArray = json_decode((string)$contents, true);
+            if(!array_key_exists('success',$pageArray)){
+                $movieData[] = $pageArray;
+                $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" .$pageArray['title']  . "&page=1&include_adult=false");
+
+                $contents = $response->getBody()->getContents();
+                $contents = json_decode((string)$contents, true);
+
+
+                $rate[$movie->movie_id] = $movie->movie_rate;
+                            
+                if (count($contents['results']) > 1) {
+                    for ($j = 0; $j < count($contents['results']); $j++) {
+                        if ($contents['results'][$j]['id'] == $movie->movie_id) {
+                            $contents = $contents['results'][$j];
+                            break;
+                        }
+                    }
+                } else {
+                    $contents = $contents['results'][0];
+                }
+                $explain[] = $contents;
+                if (isset($pageArray['poster_path'])) {
+                    $data = file_get_contents("https://image.tmdb.org/t/p/w185" .$pageArray['poster_path']);
+                    $enc_img = base64_encode($data);
+
+                    $imginfo = getimagesize('data:application/octet-stream;base64,' . $enc_img);
+
+                    $imgtxt[] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
+                } else {
+                    $imgtxt[] = '<img src="/img/noimage.png">';
+                }
+            }
+            else{
+
+            }
+        }
+        return [
+            'error' => $error, 'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
+            'selectedvalue' => $selectedvalue, 'genreArray' => $genreArray, 'config' => $config, 'user' => $user,
+            'rate' => $rate
+        ];
     }
 
     function ArrayReturn()
@@ -259,26 +345,66 @@ class APIController extends Controller
     }
     function ReturnSelectedIndex($value)
     {
-        if($value == 0){return 0;}
-        if($value == 28){return 1;}
-        if($value == 12){return 2;}
-        if($value == 16){return 3;}
-        if($value == 35){return 4;}
-        if($value == 80){return 5;}
-        if($value == 99){return 6;}
-        if($value == 18){return 7;}
-        if($value == 10751){return 8;}
-        if($value == 14){return 9;}
-        if($value == 36){return 10;}
-        if($value == 27){return 11;}
-        if($value == 10402){return 12;}
-        if($value == 9648){return 13;}
-        if($value == 10749){return 14;}
-        if($value == 878){return 15;}
-        if($value == 10770){return 16;}
-        if($value == 53){return 17;}
-        if($value == 10752){return 18;}
-        if($value == 37){return 19;}
+        if ($value == 0) {
+            return 0;
+        }
+        if ($value == 28) {
+            return 1;
+        }
+        if ($value == 12) {
+            return 2;
+        }
+        if ($value == 16) {
+            return 3;
+        }
+        if ($value == 35) {
+            return 4;
+        }
+        if ($value == 80) {
+            return 5;
+        }
+        if ($value == 99) {
+            return 6;
+        }
+        if ($value == 18) {
+            return 7;
+        }
+        if ($value == 10751) {
+            return 8;
+        }
+        if ($value == 14) {
+            return 9;
+        }
+        if ($value == 36) {
+            return 10;
+        }
+        if ($value == 27) {
+            return 11;
+        }
+        if ($value == 10402) {
+            return 12;
+        }
+        if ($value == 9648) {
+            return 13;
+        }
+        if ($value == 10749) {
+            return 14;
+        }
+        if ($value == 878) {
+            return 15;
+        }
+        if ($value == 10770) {
+            return 16;
+        }
+        if ($value == 53) {
+            return 17;
+        }
+        if ($value == 10752) {
+            return 18;
+        }
+        if ($value == 37) {
+            return 19;
+        }
     }
     function InitializedValue()
     {
@@ -291,10 +417,8 @@ class APIController extends Controller
 
     function GenreMatchCheck($genre, $movie)
     {
-        for($i = 0; $i < count($genre); $i++)
-        {
-            if(!in_array($genre[$i],$movie['genre_ids']))
-            {
+        for ($i = 0; $i < count($genre); $i++) {
+            if (!in_array($genre[$i], $movie['genre_ids'])) {
                 return false;
             }
         }

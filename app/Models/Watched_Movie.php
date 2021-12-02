@@ -11,7 +11,7 @@ class Watched_Movie extends Model
     protected $table = 'Watched_Movies';
 
     public static function getWatchedMovie($user_id) {
-        return Watched_Movie::where('user_id',$user_id)->count();
+        return Watched_Movie::where('user_id',$user_id)->get();
     }
 
     public static function alreadyWatchedMovie($user_id,$movie_id) {
@@ -33,4 +33,5 @@ class Watched_Movie extends Model
         //dd($rate['original']['movie_rate']);
         return $rate;
     }
+
 }

@@ -23,8 +23,7 @@
 
 
 
-                <form method="post">
-                    @csrf
+                <form method="POST">
                     <fieldset class="form-group">
                         <label for="movie_title">Enter the name of a title.</label>
                         <input type="text" class="form-control" name="movie_title" id="movie_title"
@@ -79,7 +78,7 @@
                         <option value='4' <?= $config['count'] == 4 ? 'selected' : '' ?>>4</option>
                         <option value='5' <?= $config['count'] == 5 ? 'selected' : '' ?>>5</option>
                     </select>
-                    <input type="submit" class="btn btn-primary" name="btn-Random">Submit</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                     <div>
                         @if ($user == null)
                             <a href="{{ route('login') }}"
@@ -87,8 +86,6 @@
                         @else
                             <a href="{{ route('loggedOutRoute') }}"
                                 class="text-sm text-gray-700 dark:text-gray-500 underline">ログアウト</a>
-                                <input type="submit" class="btn btn-secondary" name="btn-MyMovie" 
-                                class="text-sm text-gray-700 dark:text-gray-500 underline">評価した映画を表示</a>
                         @endif
                     </div>
                     @if (Route::has('register'))
@@ -136,21 +133,7 @@
                                         <option value='9' <?= $rate[$explain[$i]['id']] == 9 ? 'selected' : '' ?>>9</option>
                                         <option value='10' <?= $rate[$explain[$i]['id']] == 10 ? 'selected' : '' ?>>10</option>
                                     </select>
-                                    @else 
-                                    <select name='rate'>
-                                        <option value='なし' selected="true">なし</option>
-                                        <option value='1' >1</option>
-                                        <option value='2'>2</option>
-                                        <option value='3'>3</option>
-                                        <option value='4'>4</option>
-                                        <option value='5'>5</option>
-                                        <option value='6'>6</option>
-                                        <option value='7'>7</option>
-                                        <option value='8'>8</option>
-                                        <option value='9'>9</option>
-                                        <option value='10'>10</option>
-                                    </select>
-                                    @endif
+                                    
                                 </span>
                             @endif
                             <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>
