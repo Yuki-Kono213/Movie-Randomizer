@@ -23,7 +23,7 @@
 
 
 
-                <form method="post">
+                <form method="get">
                     @csrf
                     <fieldset class="form-group">
                         <label for="movie_title">Enter the name of a title.</label>
