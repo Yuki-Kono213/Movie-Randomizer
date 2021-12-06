@@ -200,10 +200,17 @@ class APIController extends Controller
             $config['max_vote']."&vote_average.gte=". $config['minimum_vote']."&vote_count.gte=". $config['min_vote_count']
             . "&primary_release_date.lte=". $config['max_age']."&primary_release_date.gte=". $config['minimum_age'];
         }
-
+        $i=0;
         foreach($genres as $genre)
         {
-            $string = $string. "&with_genres=" . $genre;
+            if($i === 0){
+                $string = $string. "&with_genres=" . $genre;
+                $i++;
+            }
+            else
+            {
+                $string = $string. ",". $genre;
+            }
         }
         return $string;
     }
