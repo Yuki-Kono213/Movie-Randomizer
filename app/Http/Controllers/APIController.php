@@ -75,6 +75,7 @@ class APIController extends Controller
             //     // $movieArray[] = json_decode($url_Contents->getBody()->getContents(), true);
             // }
             $pageRnd = [];
+            
             if ($totalResult == 0) {
                 $movieData[0] = "なし";
 
@@ -115,34 +116,23 @@ class APIController extends Controller
 
                     $rndResultArray = [];
                     for ($i = 0; $i < $_GET['count']; $i++) {
-                        $flag = false;
                         $page = $pageRnd[$i];
                         $rndResult = 0;
-                        while ($find < $totalResult && $find < $config['count']) {
+                        while ($find < $config['count'] && count($rndResultArray) < $totalResult) 
+                        {
 
                             if ($page ==  (int)($totalResult / 20) + 1) {
-                                $rndResult = rand(1, $totalResult % 20 - 1) + $page * 20 - 20;
-                                
-                                var_dump($rndResult);
+                                $rndResult = rand(0, $totalResult % 20 - 1) + $page * 20 - 20;
                             } else {
-                                $rndResult = rand(1, 20) + $page * 20 - 20;
-                                var_dump($rndResult);
+                                $rndResult = rand(0, 19) + $page * 20 - 20;
                             }
 
                             if (!in_array($rndResult, $rndResultArray)) {
                                 $rndResultArray[] = $rndResult;
-                                var_dump("テスト");
-
-                                var_dump((int)($totalResult / 20) + 1);
-                                var_dump($totalResult % 20 - 1);
-
-                                var_dump("https://api.themoviedb.org/3/movie/" . $movieArray[$page]['results'][$rndResultArray[$i] % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
-
-                                break;
+                                  break;
                             }
                         }
-
-                        if ($find <= $config['count']) {
+                        if ($find < $config['count'] && $find < $totalResult && $i < $totalResult) {
                             yield function () use ($client, $apikey, $movieArray, $page, $rndResultArray, $i) {
 
                                 return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page]['results'][$rndResultArray[$i] % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
@@ -162,6 +152,7 @@ class APIController extends Controller
                     }
                 },
                 'rejected' => function ($reason, $index) {
+                    var_dump("ng");
                 },
             ]);
             $promise = $pool->promise();
@@ -249,8 +240,6 @@ class APIController extends Controller
                 $string = $string . "," . $genre;
             }
         }
-
-        var_dump($string);
         return $string;
     }
 
