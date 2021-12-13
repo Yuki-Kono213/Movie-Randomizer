@@ -119,7 +119,7 @@ class APIController extends Controller
                         if ($find < $config['count'] && $find < $totalResult && $i < $totalResult) {
                             $page = $pageRnd[$i];
                             yield function () use ($client, $apikey, $movieArray, $page) {
-                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page / 20]['results'][$page % 20 - 1]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
+                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page / 20]['results'][$page % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
                             };
                         }
                     }
