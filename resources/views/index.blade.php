@@ -108,10 +108,10 @@
             <div class="content">
                 <div id="movie">
 
-                    @if ($movieData != null && $movieData[0] != 'なし')
-                        @for ($i = 0; $i < count($movieData); $i++)
+                    @if ($explain != null && $explain[0] != 'なし')
+                        @for ($i = 0; $i < count($explain); $i++)
                             <?php
-                            echo $imgtxt[$i];
+                            echo $explain[$i]['imgtxt'];
                             ?>
 
                             <div class="alert alert-success" role="alert">{{ $explain[$i]['title'] }}</div>
@@ -119,23 +119,23 @@
                                 role="alert">平均評価{{ $explain[$i]['vote_average'] }}</span>
                             <span class="alert alert-success"
                                 role="alert">上映年{{ $explain[$i]['release_date'] }}</span>
-                            <div class="alert alert-success" role="alert">上映時間{{ $movieData[$i]['runtime'] }}分</div>
+                            <div class="alert alert-success" role="alert">上映時間{{ $explain[$i]['runtime'] }}分</div>
                             <span class="alert alert-success" role="alert">評価数{{ $explain[$i]['vote_count'] }}</span>
                             @if($user != null)
                                 <span class="alert alert-success" role="alert">あなたの評価
-                                    @if(isset($rate[$explain[$i]['id']]))
+                                    @if(isset($explain[$i]['rate']))
                                     <select name='rate'>
                                         <option value='なし'>なし</option>
-                                        <option value='1' <?= $rate[$explain[$i]['id']] == 1 ? 'selected' : '' ?>>1</option>
-                                        <option value='2' <?= $rate[$explain[$i]['id']] == 2 ? 'selected' : '' ?>>2</option>
-                                        <option value='3' <?= $rate[$explain[$i]['id']] == 3 ? 'selected' : '' ?>>3</option>
-                                        <option value='4' <?= $rate[$explain[$i]['id']] == 4 ? 'selected' : '' ?>>4</option>
-                                        <option value='5' <?= $rate[$explain[$i]['id']] == 5 ? 'selected' : '' ?>>5</option>
-                                        <option value='6' <?= $rate[$explain[$i]['id']] == 6 ? 'selected' : '' ?>>6</option>
-                                        <option value='7' <?= $rate[$explain[$i]['id']] == 7 ? 'selected' : '' ?>>7</option>
-                                        <option value='8' <?= $rate[$explain[$i]['id']] == 8 ? 'selected' : '' ?>>8</option>
-                                        <option value='9' <?= $rate[$explain[$i]['id']] == 9 ? 'selected' : '' ?>>9</option>
-                                        <option value='10' <?= $rate[$explain[$i]['id']] == 10 ? 'selected' : '' ?>>10</option>
+                                        <option value='1' <?= $explain[$i]['rate'] == 1 ? 'selected' : '' ?>>1</option>
+                                        <option value='2' <?= $explain[$i]['rate'] == 2 ? 'selected' : '' ?>>2</option>
+                                        <option value='3' <?= $explain[$i]['rate'] == 3 ? 'selected' : '' ?>>3</option>
+                                        <option value='4' <?= $explain[$i]['rate'] == 4 ? 'selected' : '' ?>>4</option>
+                                        <option value='5' <?= $explain[$i]['rate'] == 5 ? 'selected' : '' ?>>5</option>
+                                        <option value='6' <?= $explain[$i]['rate'] == 6 ? 'selected' : '' ?>>6</option>
+                                        <option value='7' <?= $explain[$i]['rate'] == 7 ? 'selected' : '' ?>>7</option>
+                                        <option value='8' <?= $explain[$i]['rate'] == 8 ? 'selected' : '' ?>>8</option>
+                                        <option value='9' <?= $explain[$i]['rate'] == 9 ? 'selected' : '' ?>>9</option>
+                                        <option value='10' <?= $explain[$i]['rate'] == 10 ? 'selected' : '' ?>>10</option>
                                     </select>
                                     @else 
                                     <select name='rate'>
@@ -156,7 +156,7 @@
                             @endif
                             <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>
                         @endfor
-                    @elseif ($movieData != null && $movieData[0] == "なし")
+                    @elseif ($explain != null && $explain[0] == "なし")
                         映画が見つかりませんでした。
                     @elseif ($error)
                         <div class="alert alert-danger" role="alert">

@@ -26,9 +26,8 @@ class APIController extends Controller
         }
 
         return view('index', [
-            'error' => $array['error'], 'movieData' => $array['movieData'], 'imgtxt' => $array['imgtxt'], 'explain' => $array['explain'],
-            'selectedvalue' => $array['selectedvalue'], 'genreArray' => $array['genreArray'], 'config' => $array['config'], 'user' => $array['user'],
-            'rate' => $array['rate']
+            'error' => $array['error'], 'explain' => $array['explain'],
+            'selectedvalue' => $array['selectedvalue'], 'genreArray' => $array['genreArray'], 'config' => $array['config'], 'user' => $array['user']
         ]);
     }
 
@@ -49,7 +48,6 @@ class APIController extends Controller
         $config = [];
         $rate = [];
         $movieData = [];
-        $imgtxt = [];
         $genres = [];
         $selectedvalue = $this->InitializedValue();
         $genresArray = $this->ArrayReturn();
@@ -75,13 +73,13 @@ class APIController extends Controller
             $pageRnd = [];
             
             if ($totalResults == 0) {
-                $movieData[0] = "なし";
+                $explain[0] = "なし";
 
                 $config['minimum_vote'] = $_GET['minimum_vote'];
                 $config['max_vote'] = $_GET['max_vote'];
 
                 return [
-                    'error' => $error, 'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
+                    'error' => $error, 'explain' => $explain,
                     'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user,
                     'rate' => $rate
                 ];
@@ -98,12 +96,12 @@ class APIController extends Controller
             };
             $firstpool = new Pool($client, $firstrequests(),  [
                 'concurrency' => $_GET['count'],
-                'fulfilled' => function (ResponseInterface $response, $index) use (&$movieArray) {
+                'fulfilled' => function (ResponseInterface $response) use (&$movieArray) {
                     $contents = $response->getBody()->getContents();
                     $pageArray = json_decode((string)$contents, true);
                     $movieArray[$pageArray['page']-1] = $pageArray;
                 },
-                'rejected' => function ($reason, $index) {
+                'rejected' => function () {
                     var_dump("ng");
                 },
             ]);
@@ -157,34 +155,29 @@ class APIController extends Controller
                         break;
                     }
                     $movieData[] = $bodies[$i];
-                    $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=".$bodies[$i]['title']."&page=1&include_adult=false");
+                    $response = $client->request('GET', "https://api.themoviedb.org/3/movie/".$bodies[$i]['id']."?api_key=" . $apikey . "&language=ja&query=&page=1&include_adult=false");
                      $response = $response->getBody()->getContents();
-                    $contents[] = json_decode((string)$response, true);
-                    if($contents[0]['total_pages'] > 1){
-                        for($j = 2; $j < $contents[0]['total_pages'] + 1; $j++){
-                            $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=".$bodies[$i]['title']."&page=".$j."&include_adult=false");
-                            $response= $response->getBody()->getContents();
-                            $contents[] = json_decode((string)$response, true);
-                        }
-                    }
-                    if ($contents[0]['total_results'] > 1) {
-                        for ($j = 0; $j < $contents[0]['total_results']; $j++) {
-                            if ($contents[$j / 20]['results'][$j % 20]['id'] == $bodies[$i]['id']) {
+                    $contents = json_decode((string)$response, true);
+                    // if($contents[0]['total_pages'] > 1){
+                    //     for($j = 2; $j < $contents[0]['total_pages'] + 1; $j++){
+                    //         $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=".$bodies[$i]['title']."&page=".$j."&include_adult=false");
+                    //         $response= $response->getBody()->getContents();
+                    //         $contents[] = json_decode((string)$response, true);
+                    //     }
+                    // }
+                    // if ($contents[0]['total_results'] > 1) {
+                    //     for ($j = 0; $j < $contents[0]['total_results']; $j++) {
+                    //         if ($contents[$j / 20]['results'][$j % 20]['id'] == $bodies[$i]['id']) {
 
-                                $contents = $contents[$j / 20]['results'][$j % 20];
-                                break;
-                            }
-                        }
-                    } else {
-                        $contents = $contents[0]['results'][0];
-                    }
+                    //             $contents = $contents[$j / 20]['results'][$j % 20];
+                    //             break;
+                    //         }
+                    //     }
+                    // } else {
+                        // $contents = $contents[0]['results'];
+                    // }
                     if ($user != null && Watched_Movie::alreadyWatchedMovie($user->id, $contents['id'])) {
-                        $rate[$contents['id']] = Watched_Movie::alreadyWatchedMovieRate($user->id, $contents['id']);
-                    }
-                    $explain[] = $contents;
-                    if(!isset($explain[$i]['title']))
-                    {
-                        dd($explain, $contents);
+                        $contents['rate'] = Watched_Movie::alreadyWatchedMovieRate($user->id, $contents['id']);
                     }
                     if (isset($movieData[$i]['poster_path'])) {
                         $data = file_get_contents("https://image.tmdb.org/t/p/w185" . $movieData[$i]['poster_path']);
@@ -192,19 +185,23 @@ class APIController extends Controller
 
                         $imginfo = getimagesize('data:application/octet-stream;base64,' . $enc_img);
 
-                        $imgtxt[] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
+                        $contents['imgtxt'] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
                     } else {
-                        $imgtxt[] = '<img src="/img/noimage.png">';
+                        $contents['imgtxt'] = '<img src="/img/noimage.png">';
+                    }
+                    $explain[] = $contents;
+                    if(!isset($explain[$i]['title']))
+                    {
+                        dd($explain, $contents);
                     }
                 }
             } else {
-                $movieData[] = "なし";
+                $explain[] = "なし";
             }
         }
         return [
-            'error' => $error, 'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
-            'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user,
-            'rate' => $rate
+            'error' => $error,  'explain' => $explain,
+            'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user
         ];
     }
 
@@ -316,45 +313,47 @@ class APIController extends Controller
         foreach ($movies as $movie) {
 
 
-            $contents = $client->request('GET', "https://api.themoviedb.org/3/movie/" . $movie->movie_id . "?api_key=" . $apikey . "&language=ja-JA", ['http_errors' => false])->getBody()->getContents();
-
+            $contents = $client->request('GET', "https://api.themoviedb.org/3/movie/" . $movie->movie_id . "?api_key=" . $apikey . "&language=ja", ['http_errors' => false])->getBody()->getContents();
+            
             $pageArray = json_decode((string)$contents, true);
-            if (!array_key_exists('success', $pageArray)) {
+            // if (!array_key_exists('success', $pageArray)) {
                 $movieData[] = $pageArray;
-                $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" . $pageArray['title']  . "&page=1&include_adult=false");
+                $contents = $pageArray;
+                // $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" . $pageArray['title']  . "&page=1&include_adult=false");
 
-                $contents = $response->getBody()->getContents();
-                $contents = json_decode((string)$contents, true);
-
-
-                $rate[$movie->movie_id] = $movie->movie_rate;
-
-                if (count($contents['results']) > 1) {
-                    for ($j = 0; $j < count($contents['results']); $j++) {
-                        if ($contents['results'][$j]['id'] == $movie->movie_id) {
-                            $contents = $contents['results'][$j];
-                            break;
-                        }
-                    }
-                } else {
-                    $contents = $contents['results'][0];
-                }
-                $explain[] = $contents;
+                // $contents = $response->getBody()->getContents();
+                // $contents = json_decode((string)$contents, true);
+                $contents['rate'] = $movie->movie_rate;
+                // if (count($contents['results']) > 1) {
+                //     for ($j = 0; $j < count($contents['results']); $j++) {
+                //         if ($contents['results'][$j]['id'] == $movie->movie_id) {
+                //             $contents = $contents['results'][$j];
+                //             break;
+                //         }
+                //     }
+                // } else {
+                //     $contents = $contents['results'][0];
+                // }
                 if (isset($pageArray['poster_path'])) {
                     $data = file_get_contents("https://image.tmdb.org/t/p/w185" . $pageArray['poster_path']);
                     $enc_img = base64_encode($data);
 
                     $imginfo = getimagesize('data:application/octet-stream;base64,' . $enc_img);
 
-                    $imgtxt[] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
+                    $contents['imgtxt'] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
                 } else {
-                    $imgtxt[] = '<img src="/img/noimage.png">';
+                    $contents['imgtxt'] = '<img src="/img/noimage.png">';
                 }
-            } else {
-            }
+                if(!isset( $contents['success']) || $contents['success'])
+                {
+                    $explain[] = $contents;
+                }
+            // } 
+            // else {
+            // }
         }
         return [
-            'error' => $error, 'movieData' => $movieData, 'imgtxt' => $imgtxt, 'explain' => $explain,
+            'error' => $error,'explain' => $explain,
             'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user,
             'rate' => $rate
         ];
