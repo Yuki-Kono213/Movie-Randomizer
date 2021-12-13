@@ -90,9 +90,11 @@ class APIController extends Controller
             $pageRnd = $this->totalResultsRandomizer(1, $totalResults);
             $firstrequests = function () use ($client, $apikey, $genres, $config, $pageRnd) {
                 for ($i = 1; $i <=  $_GET['count']; $i++) {
-                    yield function () use ($client, $apikey, $i,  $genres, $config, $pageRnd) {
-                        return $client->requestAsync('GET', $this->ReturnMovieData($apikey, $genres, $config, ((int)$pageRnd[$i - 1] / 20)));
-                    };
+                    if($i <= count($pageRnd)){
+                        yield function () use ($client, $apikey, $i,  $genres, $config, $pageRnd) {
+                            return $client->requestAsync('GET', $this->ReturnMovieData($apikey, $genres, $config, (((int)$pageRnd[$i - 1] + 20) / 20)));
+                        };
+                    }
                 }
             };
             $firstpool = new Pool($client, $firstrequests(),  [
@@ -100,7 +102,7 @@ class APIController extends Controller
                 'fulfilled' => function (ResponseInterface $response, $index) use (&$movieArray) {
                     $contents = $response->getBody()->getContents();
                     $pageArray = json_decode((string)$contents, true);
-                    $movieArray[$pageArray['page']] = $pageArray;
+                    $movieArray[$pageArray['page']-1] = $pageArray;
                 },
                 'rejected' => function ($reason, $index) {
                     var_dump("ng");
@@ -113,12 +115,11 @@ class APIController extends Controller
             $rndArray = [];
                 $requests = function ($movieArray, $totalResult, $apikey, &$find) use ($client, $config, $pageRnd) {
 
-                    $rndResultArray = [];
                     for ($i = 0; $i < $_GET['count']; $i++) {
-                        $page = $pageRnd[$i];
                         if ($find < $config['count'] && $find < $totalResult && $i < $totalResult) {
-                            yield function () use ($client, $apikey, $movieArray, $page, $rndResultArray, $i) {
-                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page / 20]['results'][$page % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
+                            $page = $pageRnd[$i];
+                            yield function () use ($client, $apikey, $movieArray, $page) {
+                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page / 20]['results'][$page % 20 - 1]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
                             };
                         }
                     }
