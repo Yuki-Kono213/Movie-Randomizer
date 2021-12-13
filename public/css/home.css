@@ -35,9 +35,11 @@ input {
     margin: 20px 0;
 
 }
+.side
+{
+  width: 30%;
 
-#movie {
-
-    margin-top: 15px;
-
+}
+.content {
+  width: 70%;
 }

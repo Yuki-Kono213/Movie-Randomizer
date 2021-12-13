@@ -19,14 +19,15 @@
         <div class="article">
 
             <div class="side">
-                <h1>What's The movie?</h1>
+                <h1>Random映画</h1>
 
 
 
-                <form method="get">
+                <form method="get" id="input-form">
                     @csrf
                     <fieldset class="form-group">
-                        <label for="movie_title">Enter the name of a title.</label>
+                        <div>
+                        <label for="movie_title">映画タイトル</label></div>
                         <input type="text" class="form-control" name="movie_title" id="movie_title"
                             placeholder="映画のタイトル" value="<?php
 
