@@ -67,7 +67,7 @@ class APIController extends Controller
             // $url_Contents =   $client->request('GET',"https://api.themoviedb.org/3/discover/movie?api_key=". $apikey ."&with_genres=27");
             $url_Contents =  $client->request('GET', $this->ReturnMovieData($apikey, $genres, $config, 1));
             $PageArray = json_decode($url_Contents->getBody()->getContents(), true);
-            $totalResult = $PageArray['total_results'];
+            $totalResults = $PageArray['total_results'];
             $totalPage = $PageArray['total_pages'];
             // for ($i = 1; $i <= $totalpage; $i++) {
             //     $promises[] = $client->requestAsync('GET',"https://api.themoviedb.org/3/search/movie?api_key=" . $apikey . "&language=ja-JA&query=" . $_GET['movie_title'] . "&page=" . (string)$i . "&include_adult=false");
@@ -75,7 +75,7 @@ class APIController extends Controller
             // }
             $pageRnd = [];
             
-            if ($totalResult == 0) {
+            if ($totalResults == 0) {
                 $movieData[0] = "なし";
 
                 $config['minimum_vote'] = $_GET['minimum_vote'];
@@ -87,11 +87,11 @@ class APIController extends Controller
                     'rate' => $rate
                 ];
             }
-            $firstrequests = function () use ($client, $totalPage, $apikey, $genres, $config, &$pageRnd) {
+            $pageRnd = $this->totalResultsRandomizer(1, $totalResults);
+            $firstrequests = function () use ($client, $apikey, $genres, $config, $pageRnd) {
                 for ($i = 1; $i <=  $_GET['count']; $i++) {
-                    $pageRnd[] = rand(1, $totalPage);
                     yield function () use ($client, $apikey, $i,  $genres, $config, $pageRnd) {
-                        return $client->requestAsync('GET', $this->ReturnMovieData($apikey, $genres, $config, $pageRnd[$i - 1]));
+                        return $client->requestAsync('GET', $this->ReturnMovieData($apikey, $genres, $config, ((int)$pageRnd[$i - 1] / 20)));
                     };
                 }
             };
@@ -116,30 +116,15 @@ class APIController extends Controller
                     $rndResultArray = [];
                     for ($i = 0; $i < $_GET['count']; $i++) {
                         $page = $pageRnd[$i];
-                        $rndResult = 0;
-                        while ($find < $config['count'] && count($rndResultArray) < $totalResult) 
-                        {
-
-                            if ($page ==  (int)($totalResult / 20) + 1) {
-                                $rndResult = rand(0, $totalResult % 20 - 1) + $page * 20 - 20;
-                            } else {
-                                $rndResult = rand(0, 19) + $page * 20 - 20;
-                            }
-
-                            if (!in_array($rndResult, $rndResultArray)) {
-                                $rndResultArray[] = $rndResult;
-                                  break;
-                            }
-                        }
                         if ($find < $config['count'] && $find < $totalResult && $i < $totalResult) {
                             yield function () use ($client, $apikey, $movieArray, $page, $rndResultArray, $i) {
-                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page]['results'][$rndResultArray[$i] % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
+                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page / 20]['results'][$page % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
                             };
                         }
                     }
                 };
 
-            $pool = new Pool($client, $requests($movieArray, $totalResult, $apikey, $find), [
+            $pool = new Pool($client, $requests($movieArray, $totalResults, $apikey, $find), [
                 'concurrency' => $_GET['count'],
                 'fulfilled' => function (ResponseInterface $response, $index) use (&$bodies, &$explain, $config, &$find, $client, $apikey) {
                     if ($response != null) {
@@ -474,7 +459,32 @@ class APIController extends Controller
         $array[] = 0;
         return;
     }
+    function totalResultsRandomizer($min, $totalResults)
+    {
+        /** 乱数用配列 */
+        $rands = [];
+        /** 乱数の範囲は1～10 */
+        $max = $totalResults;
 
+        for ($i = $min; $i <= $max; $i++) {
+            while (true) {
+                /** 一時的な乱数を作成 */
+                $tmp = mt_rand($min, $max);
+
+                /*
+     * 乱数配列に含まれているならwhile続行、 
+     * 含まれてないなら配列に代入してbreak 
+     */
+                if (!in_array($tmp, $rands)) {
+                    array_push($rands, $tmp);
+                    break;
+                }
+            }
+        }
+
+        return $rands;
+    }
+    
     function totalPageRandomizer($min, $totalpage)
     {
         /** 乱数用配列 */
