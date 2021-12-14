@@ -27,7 +27,7 @@
                     @csrf
                     <fieldset class="form-group">
                         <div>
-                        <label for="movie_title">映画タイトル</label></div>
+                        {{-- <label for="movie_title">映画タイトル</label></div>
                         <input type="text" class="form-control" name="movie_title" id="movie_title"
                             placeholder="映画のタイトル" value="<?php
 
@@ -35,7 +35,7 @@
                                 echo $_GET['movie_title'];
                             }
 
-                            ?>">
+                            ?>"> --}}
                         <div>上映時間</div>
                         <input type="text" class="form-control" name="minimum_time" id="minimum_time"
                             placeholder="最小上映時間" value={{ $config['minimum_time'] }}>
