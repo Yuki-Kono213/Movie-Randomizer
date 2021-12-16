@@ -23,7 +23,7 @@
 
 
 
-                <form method="post" id="input-form">
+                <form method="get" id="input-form">
                     @csrf
                     <fieldset class="form-group">
                         <div>
@@ -110,11 +110,12 @@
 
             <div class="content">
 
-                <form method="get" id="input-form">
-                    <div id="movie">
+                <div id="movie">
 
-                        @if ($explain != null && $explain[0] != 'なし')
-                            @for ($i = 0; $i < count($explain); $i++)
+                    @if ($explain != null && $explain[0] != 'なし')
+                        @for ($i = 0; $i < count($explain); $i++)
+
+                            <form method="post" id="input-form">
                                 <?php
                                 echo $explain[$i]['imgtxt'];
                                 ?>
@@ -128,11 +129,12 @@
                                 </div>
                                 <span class="alert alert-success"
                                     role="alert">評価数{{ $explain[$i]['vote_count'] }}</span>
+                                <input type="hidden" name="movie_id" value="{{ $explain[$i]['id'] }}">
                                 @if ($user != null)
                                     <span class="alert alert-success" role="alert">あなたの評価
                                         @if (isset($explain[$i]['rate']))
                                             <select name='rate'>
-                                                <option value='なし'>なし</option>
+                                                <option value='0'>なし</option>
                                                 <option value='1' <?= $explain[$i]['rate'] == 1 ? 'selected' : '' ?>>1
                                                 </option>
                                                 <option value='2' <?= $explain[$i]['rate'] == 2 ? 'selected' : '' ?>>2
@@ -154,11 +156,11 @@
                                                 <option value='10' <?= $explain[$i]['rate'] == 10 ? 'selected' : '' ?>>
                                                     10</option>
                                             </select>
-                                            <input type="submit" class="btn btn-primary" name="btn-Random" value="更新">
-                                              
+                                            <input type="submit" class="btn btn-primary" name="btn-Renew" value="更新">
+
                                         @else
                                             <select name='rate'>
-                                                <option value='なし' selected="true">なし</option>
+                                                <option value='0' selected="true">なし</option>
                                                 <option value='1'>1</option>
                                                 <option value='2'>2</option>
                                                 <option value='3'>3</option>
@@ -170,25 +172,26 @@
                                                 <option value='9'>9</option>
                                                 <option value='10'>10</option>
                                             </select>
-                                            <input type="submit" class="btn btn-primary" name="btn-Random" value="評価">
-                                                
+                                            <input type="submit" class="btn btn-primary" name="btn-Add"
+                                                value="視聴リストに追加">
+
                                         @endif
                                     </span>
                                 @endif
                                 <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>
-                            @endfor
-                        @elseif ($explain != null && $explain[0] == "なし")
-                            映画が見つかりませんでした。
-                        @elseif ($error)
-                            <div class="alert alert-danger" role="alert">
-                                {{ $error }}
-                            </div>;
-                        @endif
+                            </form>
+                        @endfor
+                    @elseif ($explain != null && $explain[0] == "なし")
+                        映画が見つかりませんでした。
+                    @elseif ($error)
+                        <div class="alert alert-danger" role="alert">
+                            {{ $error }}
+                        </div>;
+                    @endif
 
 
-                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
