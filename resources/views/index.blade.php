@@ -116,6 +116,7 @@
                         @for ($i = 0; $i < count($explain); $i++)
 
                             <form method="post" id="input-form">
+                                @csrf
                                 <?php
                                 echo $explain[$i]['imgtxt'];
                                 ?>

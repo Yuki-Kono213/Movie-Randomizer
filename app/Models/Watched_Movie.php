@@ -20,7 +20,7 @@ class Watched_Movie extends Model
 
     public static function getWatchedMovie($user_id)
     {
-        $movie = Watched_Movie::where('user_id', $user_id)->paginate(5);
+        $movie = Watched_Movie::where('user_id', $user_id)->orderBy('updated_at','desc')->paginate(5);
         return $movie;
     }
 

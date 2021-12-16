@@ -24,7 +24,7 @@ class APIController extends Controller
             $this->AddDataBase();
             $movies = $this->WatchedMovieView();
             $movies = $this->WatchedMovieViewInsertExplain($movies);
-            return view('watched_movie', [
+            return view('/watched_movie', [
                 'movies' => $movies
             ]);
         } else if ($request->has('btn-Renew')) {
@@ -37,7 +37,7 @@ class APIController extends Controller
         } else {
             $movies = $this->WatchedMovieView();
             $movies = $this->WatchedMovieViewInsertExplain($movies);
-            return view('watched_movie', [
+            return view('/watched_movie', [
                 'movies' => $movies
             ]);
         }

@@ -21,11 +21,11 @@
             <div class="content">
 
                 <div id="movie">
-
                     @if ($movies != null)
                         @foreach ($movies as $movie)
 
                             <form method="post" id="input-form">
+                                @csrf
                                 <?php
                                 echo $movie->explain['imgtxt'];
                                 ?>
@@ -38,28 +38,28 @@
                                 <span class="alert alert-success" role="alert">評価数{{ $movie->explain['vote_count'] }}</span>
                                 <input type="hidden" name="movie_id" value="{{ $movie->explain['id'] }}">
                                 <span class="alert alert-success" role="alert">あなたの評価
-                                    @if (isset($movie->explain['rate']))
+                                    @if (isset($movie->movie_rate))
                                         <select name='rate'>
                                             <option value='0'>なし</option>
-                                            <option value='1' <?= $movie->explain['rate'] == 1 ? 'selected' : '' ?>>1
+                                            <option value='1' <?= $movie->movie_rate == 1 ? 'selected' : '' ?>>1
                                             </option>
-                                            <option value='2' <?= $movie->explain['rate'] == 2 ? 'selected' : '' ?>>2
+                                            <option value='2' <?= $movie->movie_rate == 2 ? 'selected' : '' ?>>2
                                             </option>
-                                            <option value='3' <?= $movie->explain['rate'] == 3 ? 'selected' : '' ?>>3
+                                            <option value='3' <?= $movie->movie_rate == 3 ? 'selected' : '' ?>>3
                                             </option>
-                                            <option value='4' <?= $movie->explain['rate'] == 4 ? 'selected' : '' ?>>4
+                                            <option value='4' <?= $movie->movie_rate == 4 ? 'selected' : '' ?>>4
                                             </option>
-                                            <option value='5' <?= $movie->explain['rate'] == 5 ? 'selected' : '' ?>>5
+                                            <option value='5' <?= $movie->movie_rate == 5 ? 'selected' : '' ?>>5
                                             </option>
-                                            <option value='6' <?= $movie->explain['rate'] == 6 ? 'selected' : '' ?>>6
+                                            <option value='6' <?= $movie->movie_rate == 6 ? 'selected' : '' ?>>6
                                             </option>
-                                            <option value='7' <?= $movie->explain['rate'] == 7 ? 'selected' : '' ?>>7
+                                            <option value='7' <?= $movie->movie_rate == 7 ? 'selected' : '' ?>>7
                                             </option>
-                                            <option value='8' <?= $movie->explain['rate'] == 8 ? 'selected' : '' ?>>8
+                                            <option value='8' <?= $movie->movie_rate == 8 ? 'selected' : '' ?>>8
                                             </option>
-                                            <option value='9' <?= $movie->explain['rate'] == 9 ? 'selected' : '' ?>>9
+                                            <option value='9' <?= $movie->movie_rate == 9 ? 'selected' : '' ?>>9
                                             </option>
-                                            <option value='10' <?= $movie->explain['rate'] == 10 ? 'selected' : '' ?>>
+                                            <option value='10' <?= $movie->movie_rate == 10 ? 'selected' : '' ?>>
                                                 10</option>
                                         </select>
                                         <input type="submit" class="btn btn-primary" name="btn-Renew" value="更新">
@@ -78,7 +78,7 @@
                                             <option value='9'>9</option>
                                             <option value='10'>10</option>
                                         </select>
-                                        <input type="submit" class="btn btn-primary" name="btn-Add" value="視聴リストに追加">
+                                        <input type="submit" class="btn btn-primary" name="btn-Renew" value="評価">
 
                                     @endif
                                 </span>
