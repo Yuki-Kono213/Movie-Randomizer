@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [App\Http\Controllers\APIController::class, 'RoutingFuncIndex']);
 Route::post('/', [App\Http\Controllers\APIController::class, 'RoutingFuncIndex']);
-Route::get('/watched_movie', [App\Http\Controllers\APIController::class, 'RoutingFunc']);
+Route::get('/watched_movie', [App\Http\Controllers\APIController::class, 'RoutingFunc'])->name('move_watched_movie');
 Route::post('/watched_movie', [App\Http\Controllers\APIController::class, 'RoutingFunc']);
 
 Route::get('/logout', [App\Http\Controllers\LogOutController::class, 'loggedOut'])->name('loggedOutRoute');

@@ -34,25 +34,20 @@ class APIController extends Controller
             return view('/watched_movie', [
                 'movies' => $movies
             ]);
-        } else {
-            $movies = $this->WatchedMovieView();
-            $movies = $this->WatchedMovieViewInsertExplain($movies);
-            return view('/watched_movie', [
-                'movies' => $movies
-            ]);
         }
+
+        $movies = $this->WatchedMovieView();
+        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        return view('/watched_movie', [
+            'movies' => $movies
+        ]);
+        
     }
     public function RoutingFuncIndex(Request $request)
     {
         $array = [];
         if ($request->has('btn-Add')) {
             $this->AddDataBase();
-            $movies = $this->WatchedMovieView();
-            $movies = $this->WatchedMovieViewInsertExplain($movies);
-            return redirect('watched_movie')->with([
-                'movies' => $movies
-            ]);
-        } else if ($request->has('btn-MyMovie')) {
             $movies = $this->WatchedMovieView();
             $movies = $this->WatchedMovieViewInsertExplain($movies);
             return redirect('watched_movie')->with([

@@ -90,8 +90,8 @@
                         @else
                             <a href="{{ route('loggedOutRoute') }}"
                                 class="text-sm text-gray-700 dark:text-gray-500 underline">ログアウト</a>
-                            <input type="submit" class="btn btn-secondary" name="btn-MyMovie"
-                                class="text-sm text-gray-700 dark:text-gray-500 underline" value="評価した映画を表示"></a>
+                            <a href="{{ route('move_watched_movie') }}" type="submit" class="btn btn-secondary" name="btn-MyMovie"
+                                class="text-sm text-gray-700 dark:text-gray-500 underline">評価した映画を表示</a>
                         @endif
                     </div>
                     @if (Route::has('register'))
