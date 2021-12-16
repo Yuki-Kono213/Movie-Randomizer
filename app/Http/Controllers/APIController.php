@@ -43,23 +43,15 @@ class APIController extends Controller
         ]);
         
     }
-    public function RoutingFuncIndex(Request $request)
+
+    public function PostWatchedMovieView(Request $request)
     {
-        $array = [];
-        if ($request->has('btn-Add')) {
-            $this->AddDataBase();
-            $movies = $this->WatchedMovieView();
-            $movies = $this->WatchedMovieViewInsertExplain($movies);
-            return redirect('watched_movie')->with([
-                'movies' => $movies
-            ]);
-        } else {
-            $array = $this->index();
-            return view('index', [
-                'error' => $array['error'], 'explain' => $array['explain'],
-                'selectedvalue' => $array['selectedvalue'], 'genreArray' => $array['genreArray'], 'config' => $array['config'], 'user' => $array['user']
-            ]);
-        }
+        $this->AddDataBase();
+        $movies = $this->WatchedMovieView();
+        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        return redirect('watched_movie')->with([
+            'movies' => $movies
+        ]);
     }
 
     function index()
@@ -251,10 +243,10 @@ class APIController extends Controller
             }
             var_dump($time = microtime(true) - $time_start);
         }
-        return [
+        return view('index', [
             'error' => $error,  'explain' => $explain,
             'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user
-        ];
+        ]);
     }
 
     function ReturnMovieData($apikey, $genres, $config, $page)

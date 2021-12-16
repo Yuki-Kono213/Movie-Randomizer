@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Auth;
 //     return view('welcome');
 // });
 
-Route::get('/', [App\Http\Controllers\APIController::class, 'RoutingFuncIndex']);
-Route::post('/', [App\Http\Controllers\APIController::class, 'RoutingFuncIndex']);
+Route::get('/', [App\Http\Controllers\APIController::class, 'index']);
+Route::post('/', [App\Http\Controllers\APIController::class, 'PostWatchedMovieView']);
 Route::get('/watched_movie', [App\Http\Controllers\APIController::class, 'RoutingFunc'])->name('move_watched_movie');
 Route::post('/watched_movie', [App\Http\Controllers\APIController::class, 'RoutingFunc']);
 
