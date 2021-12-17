@@ -16,8 +16,16 @@ body {
    width:100% - 450px;
    height:100%;
    text-align:center;
+   width: 70%;
  }
  
+ .movie-content {
+  background-color:#b3d874;
+  width:auto;
+  height:auto;
+  text-align:center;
+}
+
  .article {
    display:flex;/*サイドバーとメインコンテンツを横並びにする                指定をした*/
  }
@@ -29,7 +37,13 @@ body {
 }
 
 
-
+* {
+  
+      margin: 0px;
+  
+      padding: 0px;
+  }
+  
 input {
 
     margin: 20px 0;
@@ -40,6 +54,21 @@ input {
   width: 30%;
 
 }
-.content {
-  width: 70%;
+
+
+
+.pagination li {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+    line-height: 35px;
+    border: 1px solid #000099;
+    
+}
+
+
+.pagination li a {
+  display: block;
+  text-decoration: none;
 }

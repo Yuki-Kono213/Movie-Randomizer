@@ -18,7 +18,7 @@
     <div class="container">
         <div class="article">
 
-            <div class="content">
+            <div class="movie-content">
 
                 <div id="movie">
                     @if ($movies != null)
@@ -85,7 +85,6 @@
                                 <div class="alert alert-success" role="alert">{{ $movie->explain['overview'] }}</div>
                             </form>
                         @endforeach
-                        {{ $movies->links() }}
                     @elseif ($movies != null && $movies[0] == "なし")
                         映画が見つかりませんでした。
                     @elseif ($error)
@@ -94,7 +93,8 @@
                         </div>;
                     @endif
 
-
+                    {{ $movies->links('vendor.pagination.sample-pagination') }}
+                    <a href={{route('Index')}}>戻る</a>
                 </div>
             </div>
         </div>
@@ -102,6 +102,7 @@
 
     <!-- jQuery first, then Bootstrap JS. -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script> 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js"
         integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous">
     </script>
