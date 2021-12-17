@@ -43,7 +43,23 @@ class APIController extends Controller
         ]);
         
     }
-
+    public function Sort_rate(Request $request)
+    {
+        $movies = $this->WatchedMovieView_Sorted_rate();
+        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        return view('watched_movie',[
+            'movies' => $movies
+        ]);
+    }    
+    
+    public function Sort_updated(Request $request)
+    {
+        $movies = $this->WatchedMovieView();
+        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        return  view('watched_movie',[
+            'movies' => $movies
+        ]);
+    }
     public function PostWatchedMovieView(Request $request)
     {
         $this->AddDataBase();
@@ -346,6 +362,14 @@ class APIController extends Controller
 
         $user = Auth::user();
         $movies = Watched_Movie::getWatchedMovie($user->id);
+        return $movies;
+    }
+
+    function WatchedMovieView_Sorted_rate()
+    {
+
+        $user = Auth::user();
+        $movies = Watched_Movie::getWatchedMovie_Sort_Rate($user->id);
         return $movies;
     }
 

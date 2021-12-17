@@ -22,6 +22,8 @@ Route::get('/', [App\Http\Controllers\APIController::class, 'index'])->name('Ind
 Route::post('/', [App\Http\Controllers\APIController::class, 'PostWatchedMovieView']);
 Route::get('/watched_movie', [App\Http\Controllers\APIController::class, 'RoutingFunc'])->name('move_watched_movie');
 Route::post('/watched_movie', [App\Http\Controllers\APIController::class, 'RoutingFunc']);
+Route::get('/watched_movie/rate', [App\Http\Controllers\APIController::class, 'Sort_rate'])->name('sort_rate');
+Route::get('/watched_movie/updated', [App\Http\Controllers\APIController::class, 'Sort_updated'])->name('sort_updated');
 
 Route::get('/logout', [App\Http\Controllers\LogOutController::class, 'loggedOut'])->name('loggedOutRoute');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

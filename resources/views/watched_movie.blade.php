@@ -22,6 +22,8 @@
 
                 <div id="movie">
                     @if ($movies != null)
+                        <a href={{route('sort_rate')}}>評価順で並び替え</a>
+                        <a href={{route('sort_updated')}}>更新順で並び替え</a>
                         @foreach ($movies as $movie)
 
                             <form method="post" id="input-form">

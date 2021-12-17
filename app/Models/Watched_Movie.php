@@ -25,6 +25,12 @@ class Watched_Movie extends Model
         return $movie;
     }
 
+    public static function getWatchedMovie_Sort_Rate($user_id)
+    {
+        $movie = Watched_Movie::where('user_id', $user_id)->orderBy('updated_at','desc')->orderBy('movie_rate','desc')->paginate(5);
+        return $movie;
+    }
+
     public static function alreadyWatchedMovie($user_id, $movie_id)
     {
         $id = Watched_Movie::where('user_id', $user_id)->where('movie_id', $movie_id)->count();
