@@ -27,16 +27,6 @@
                     @csrf
                     <fieldset class="form-group">
                         <div>
-                            {{-- <label for="movie_title">映画タイトル</label></div>
-                        <input type="text" class="form-control" name="movie_title" id="movie_title"
-                            placeholder="映画のタイトル" value="<?php
-
-// if (array_key_exists('movie_title', $_GET)) {
-//     echo $_GET['movie_title'];
-// }
-
-//
-?>"> --}}
                             <div>上映時間</div>
                             <input type="text" class="form-control" name="minimum_time" id="minimum_time"
                                 placeholder="最小上映時間" value={{ $config['minimum_time'] }}>
@@ -90,7 +80,8 @@
                         @else
                             <a href="{{ route('loggedOutRoute') }}"
                                 class="text-sm text-gray-700 dark:text-gray-500 underline">ログアウト</a>
-                            <a href="{{ route('move_watched_movie') }}" type="submit" class="btn btn-secondary" name="btn-MyMovie"
+                            <a href="{{ route('sort_updated') }}" type="submit" class="btn btn-secondary"
+                                name="btn-MyMovie"
                                 class="text-sm text-gray-700 dark:text-gray-500 underline">評価した映画を表示</a>
                         @endif
                     </div>
@@ -109,13 +100,14 @@
             </div>
 
             <div class="content">
+                <form method="post" id="input-form">
 
-                <div id="movie">
 
-                    @if ($explain != null && $explain[0] != 'なし')
-                        @for ($i = 0; $i < count($explain); $i++)
+                    <div id="movie">
 
-                            <form method="post" id="input-form">
+                        @if ($explain != null && $explain[0] != 'なし')
+                            @for ($i = 0; $i < count($explain); $i++)
+
                                 @csrf
                                 <?php
                                 echo $explain[$i]['imgtxt'];
@@ -132,73 +124,40 @@
                                     role="alert">評価数{{ $explain[$i]['vote_count'] }}</span>
                                 <input type="hidden" name="movie_id" value="{{ $explain[$i]['id'] }}">
                                 @if ($user != null)
-                                    <span class="alert alert-success" role="alert">あなたの評価
-                                        @if (isset($explain[$i]['rate']))
-                                            <select name='rate'>
-                                                <option value='0'>なし</option>
-                                                <option value='1' <?= $explain[$i]['rate'] == 1 ? 'selected' : '' ?>>1
-                                                </option>
-                                                <option value='2' <?= $explain[$i]['rate'] == 2 ? 'selected' : '' ?>>2
-                                                </option>
-                                                <option value='3' <?= $explain[$i]['rate'] == 3 ? 'selected' : '' ?>>3
-                                                </option>
-                                                <option value='4' <?= $explain[$i]['rate'] == 4 ? 'selected' : '' ?>>4
-                                                </option>
-                                                <option value='5' <?= $explain[$i]['rate'] == 5 ? 'selected' : '' ?>>5
-                                                </option>
-                                                <option value='6' <?= $explain[$i]['rate'] == 6 ? 'selected' : '' ?>>6
-                                                </option>
-                                                <option value='7' <?= $explain[$i]['rate'] == 7 ? 'selected' : '' ?>>7
-                                                </option>
-                                                <option value='8' <?= $explain[$i]['rate'] == 8 ? 'selected' : '' ?>>8
-                                                </option>
-                                                <option value='9' <?= $explain[$i]['rate'] == 9 ? 'selected' : '' ?>>9
-                                                </option>
-                                                <option value='10' <?= $explain[$i]['rate'] == 10 ? 'selected' : '' ?>>
-                                                    10</option>
-                                            </select>
-                                            <input type="submit" class="btn btn-primary" name="btn-Renew" value="更新">
-
+                                    @if (isset($explain[$i]['rate']))
+                                        <span class="alert alert-success" role="alert">あなたの評価
+                                            {{ $explain[$i]['rate'] }}
                                         @else
-                                            <select name='rate'>
-                                                <option value='0' selected="true">なし</option>
-                                                <option value='1'>1</option>
-                                                <option value='2'>2</option>
-                                                <option value='3'>3</option>
-                                                <option value='4'>4</option>
-                                                <option value='5'>5</option>
-                                                <option value='6'>6</option>
-                                                <option value='7'>7</option>
-                                                <option value='8'>8</option>
-                                                <option value='9'>9</option>
-                                                <option value='10'>10</option>
-                                            </select>
-                                            <input type="submit" class="btn btn-primary" name="btn-Add"
-                                                value="視聴リストに追加">
-
-                                        @endif
+                                            <label>
+                                                <input type="checkbox" class="cb" name="category[]"
+                                                    value="{{ $explain[$i]['id'] }}">
+                                                <span> 視聴する</span></label>
+                                    @endif
                                     </span>
                                 @endif
                                 <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>
-                            </form>
-                        @endfor
-                    @elseif ($explain != null && $explain[0] == "なし")
-                        映画が見つかりませんでした。
-                    @elseif ($error)
-                        <div class="alert alert-danger" role="alert">
-                            {{ $error }}
-                        </div>;
-                    @endif
 
+                            @endfor
+                        @elseif ($explain != null && $explain[0] == "なし")
+                            映画が見つかりませんでした。
+                        @elseif ($error)
+                            <div class="alert alert-danger" role="alert">
+                                {{ $error }}
+                            </div>;
+                        @endif
+                        @if ($explain != null && $explain[0] != 'なし')
+                            <input type="submit" class="btn btn-primary" name="btn-Add" value="チェックした映画を視聴リストに追加">
+                        @endif
 
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <!-- jQuery first, then Bootstrap JS. -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js"
         integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous">
     </script>

@@ -20,49 +20,54 @@ class APIController extends Controller
 
     public function RoutingFunc(Request $request)
     {
-        if ($request->has('btn-Add')) {
-            $this->AddDataBase();
-            $movies = $this->WatchedMovieView();
-            $movies = $this->WatchedMovieViewInsertExplain($movies);
-            return view('/watched_movie', [
-                'movies' => $movies
-            ]);
-        } else if ($request->has('btn-Renew')) {
+        if ($request->has('btn-Renew')) {
+            
             $this->RenewDataBase();
-            $movies = $this->WatchedMovieView();
-            $movies = $this->WatchedMovieViewInsertExplain($movies);
-            return view('/watched_movie', [
-                'movies' => $movies
-            ]);
-        }
 
-        $movies = $this->WatchedMovieView();
-        $movies = $this->WatchedMovieViewInsertExplain($movies);
+            if($request->input('order') == 'rate'){
+                return view('watched_movie', [
+                    'movies' => $this->PassSort_rate()
+                ]);
+            }
+        }
         return view('/watched_movie', [
-            'movies' => $movies
+            'movies' => $this->PassSort_updated()
         ]);
-        
     }
-    public function Sort_rate(Request $request)
+    public function Sort_rate()
     {
-        $movies = $this->WatchedMovieView_Sorted_rate();
-        $movies = $this->WatchedMovieViewInsertExplain($movies);
+
         return view('watched_movie',[
-            'movies' => $movies
+            'movies' => $this->PassSort_rate()
         ]);
-    }    
-    
-    public function Sort_updated(Request $request)
+    }
+    public function PassSort_rate()
+    {
+        $movies = $this->WatchedMovieView_sortbyrate();
+        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        $movies->sort_order = "rate";
+        return $movies;
+    }
+    public function Sort_updated()
+    {
+        return view('watched_movie',[
+            'movies' => $this->PassSort_updated()
+        ]);
+    }
+    public function PassSort_updated()
     {
         $movies = $this->WatchedMovieView();
         $movies = $this->WatchedMovieViewInsertExplain($movies);
-        return  view('watched_movie',[
-            'movies' => $movies
-        ]);
+        
+        $movies->sort_order = 'updated';
+        return $movies;
     }
     public function PostWatchedMovieView(Request $request)
     {
-        $this->AddDataBase();
+        $watchmovies = $request->input('category');
+        foreach($watchmovies as $watchmovie){
+            $this->AddDataBase($watchmovie);
+        }
         $movies = $this->WatchedMovieView();
         $movies = $this->WatchedMovieViewInsertExplain($movies);
         return redirect('watched_movie')->with([
@@ -152,7 +157,7 @@ class APIController extends Controller
             $requests = function ($total) use ($client, $config, $pageRnd, $movieArray, $apikey, &$find) {
 
                 for ($i = 0; $i < $total; $i++) {
-                    if ($find < $config['count'] && $find < $total && $i < $total) {
+                    if ($i < count($pageRnd) && $find < $config['count'] && $find < $total && $i < $total) {
                         $page = $pageRnd[$i];
                         yield function () use ($client, $apikey, $movieArray, $page) {
                             return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page / 20]['results'][$page % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
@@ -187,13 +192,13 @@ class APIController extends Controller
             //         $bodies[] = $body;
             //     }
             // }
-            var_dump($time = microtime(true) - $time_start);
+            //var_dump($time = microtime(true) - $time_start);
             $explain = [];
             if (count($bodies) > 0) {
                 $requests = function ($total) use ($client, $config, $bodies, $i, $apikey) {
                     for ($i = 0; $i < $total; $i++) {
 
-                        if ($i < $config['count'] && $i < $total && $i < $total) {
+                        if ($i < count($bodies) && $i < $config['count'] && $i < $total && $i < $total) {
                             $movieData[] = $bodies[$i];
 
                             yield function () use ($client, $bodies, $apikey, $i) {
@@ -257,7 +262,7 @@ class APIController extends Controller
             } else {
                 $explain[] = "なし";
             }
-            var_dump($time = microtime(true) - $time_start);
+            //var_dump($time = microtime(true) - $time_start);
         }
         return view('index', [
             'error' => $error,  'explain' => $explain,
@@ -346,10 +351,10 @@ class APIController extends Controller
         return false;
     }
 
-    function AddDataBase()
+    function AddDataBase($movie)
     {
         $user = Auth::user();
-        Watched_Movie::addWatchedMovieRate($user->id, $_POST['movie_id'], $_POST['rate']);
+        Watched_Movie::addWatchedMovieRate($user->id, $movie, 0);
     }
 
     function RenewDataBase()
@@ -365,11 +370,11 @@ class APIController extends Controller
         return $movies;
     }
 
-    function WatchedMovieView_Sorted_rate()
+    function WatchedMovieView_sortbyrate()
     {
 
         $user = Auth::user();
-        $movies = Watched_Movie::getWatchedMovie_Sort_Rate($user->id);
+        $movies = Watched_Movie::getWatchedMovie_sortbyrate($user->id);
         return $movies;
     }
 
@@ -432,11 +437,9 @@ class APIController extends Controller
 
         $promise = $pool->promise();
         $promise->wait();
-        foreach ($movies as $movie)
-        {
-            for($i =0; $i < count($explain); $i++){
-                if($movie->movie_id == $explain[$i]['id'])
-                {
+        foreach ($movies as $movie) {
+            for ($i = 0; $i < count($explain); $i++) {
+                if ($movie->movie_id == $explain[$i]['id']) {
                     $movie->explain = $explain[$i];
                     break;
                 }

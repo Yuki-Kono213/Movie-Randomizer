@@ -16,7 +16,7 @@
 <body>
 
     <div class="container">
-        <div class="article">
+        <div class="movie-article">
 
             <div class="movie-content">
 
@@ -28,6 +28,9 @@
 
                             <form method="post" id="input-form">
                                 @csrf
+                                @if($movies->sort_order != null)
+                                    <input type="hidden" name="order" value={{$movies->sort_order}}>
+                                @endif
                                 <?php
                                 echo $movie->explain['imgtxt'];
                                 ?>
