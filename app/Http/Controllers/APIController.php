@@ -13,7 +13,8 @@ use Psr\Http\Message\ResponseInterface;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Watched_Movie;
 use Illuminate\Support\Facades\DB;
-
+use stdClass;
+use Illuminate\Support\Collection;
 
 class APIController extends Controller
 {
@@ -44,7 +45,7 @@ class APIController extends Controller
     public function PassSort_rate()
     {
         $movies = $this->WatchedMovieView_sortbyrate();
-        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        $movies = $this->GetMovieExplain($movies);
         $movies->sort_order = "rate";
         return $movies;
     }
@@ -57,7 +58,7 @@ class APIController extends Controller
     public function PassSort_updated()
     {
         $movies = $this->WatchedMovieView();
-        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        $movies = $this->GetMovieExplain($movies);
         
         $movies->sort_order = 'updated';
         return $movies;
@@ -69,7 +70,7 @@ class APIController extends Controller
             $this->AddDataBase($watchmovie);
         }
         $movies = $this->WatchedMovieView();
-        $movies = $this->WatchedMovieViewInsertExplain($movies);
+        $movies = $this->GetMovieExplain($movies);
         return redirect('watched_movie')->with([
             'movies' => $movies
         ]);
@@ -90,14 +91,13 @@ class APIController extends Controller
         $explain = [];
         $config = [];
         $rate = [];
-        $movieData = [];
         $genres = [];
         $selectedvalue = $this->InitializedValue();
         $genresArray = $this->ArrayReturn();
         $config = $this->GetConfigData();
 
+        $movies = null;
         if ($this->inputExist()) {
-            $time_start = microtime(true);
 
             $url_Contents = [];
             $genres = [];
@@ -118,7 +118,7 @@ class APIController extends Controller
             $pageRnd = [];
 
             if ($totalResults == 0) {
-                $explain[0] = "なし";
+                $movies = null;
 
                 $config['minimum_vote'] = $_GET['minimum_vote'];
                 $config['max_vote'] = $_GET['max_vote'];
@@ -154,6 +154,7 @@ class APIController extends Controller
             $promise = $firstpool->promise();
             $promise->wait();
             $find = 0;
+            $movies = [];
             $requests = function ($total) use ($client, $config, $pageRnd, $movieArray, $apikey, &$find) {
 
                 for ($i = 0; $i < $total; $i++) {
@@ -183,6 +184,7 @@ class APIController extends Controller
             $promise = $pool->promise();
             $movieArray = $bodies;
             $promise->wait();
+
             // $responses = $promise;
             // foreach ($responses as $response) {
 
@@ -195,81 +197,92 @@ class APIController extends Controller
             //var_dump($time = microtime(true) - $time_start);
             $explain = [];
             if (count($bodies) > 0) {
-                $requests = function ($total) use ($client, $config, $bodies, $i, $apikey) {
-                    for ($i = 0; $i < $total; $i++) {
-
-                        if ($i < count($bodies) && $i < $config['count'] && $i < $total && $i < $total) {
-                            $movieData[] = $bodies[$i];
-
-                            yield function () use ($client, $bodies, $apikey, $i) {
-
-                                return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $bodies[$i]['id'] . "?api_key=" . $apikey . "&language=ja&page=1&include_adult=false");
-                            };
-                        }
-                    }
-                };
-                $pool = new Pool($client, $requests($_GET['count']), [
-                    'concurrency' => $_GET['count'],
-                    'fulfilled' => function (ResponseInterface $response) use (&$explain, $user) {
-                        if ($response != null) {
-                            $response = $response->getBody()->getContents();
-                            $contents = json_decode((string)$response, true);
-                            if ($user != null && Watched_Movie::alreadyWatchedMovie($user->id, $contents['id'])) {
-                                $contents['rate'] = Watched_Movie::alreadyWatchedMovieRate($user->id, $contents['id']);
-                            }
-
-                            $explain[] = $contents;
-                        }
-                    },
-                    'rejected' => function () {
-                        var_dump("ng");
-                    },
-                ]);
-                $promise = $pool->promise();
-                $promise->wait();
-                $a = [];
-                $requests = function ($total) use ($client, $config, $i, $explain) {
-                    for ($i = 0; $i < $total; $i++) {
-
-                        if ($i < $config['count'] && $i < $total && $i < $total) {
-                            if (isset($explain[$i]['poster_path'])) {
-                                yield function () use ($client, $explain, $i) {
-
-                                    return $client->requestAsync('GET', "https://image.tmdb.org/t/p/w185" . $explain[$i]['poster_path']);
-                                };
-                            } else {
-                                $explain[$i]['imgtxt'] = '<img src="/img/noimage.png">';
-                            }
-                        }
-                    }
-                };
-                $pool = new Pool($client, $requests($_GET['count']), [
-                    'concurrency' => $_GET['count'],
-                    'fulfilled' => function (ResponseInterface $response, $i) use (&$explain, $user) {
-                        if ($response != null) {
-                            $response = $response->getBody()->getContents();
-                            $enc_img = base64_encode($response);
-                            $imginfo = getimagesize('data:application/octet-stream;base64,' . $enc_img);
-                            $explain[$i]['imgtxt'] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
-                        }
-                    },
-                    'rejected' => function () {
-                        var_dump("ng");
-                    },
-                ]);
-                $promise = $pool->promise();
-                $promise->wait();
+                for($i = 0; $i < count($bodies); $i++)
+                {
+                    $movies[$i] = new Watched_Movie(['movie_id' => $bodies[$i]['id']]);
+                }
+                $movies = $this->GetMovieExplain($movies);
             } else {
-                $explain[] = "なし";
+                $movies = null;
             }
             //var_dump($time = microtime(true) - $time_start);
         }
         return view('index', [
-            'error' => $error,  'explain' => $explain,
+            'error' => $error,  'movies' => $movies,
             'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user
         ]);
     }
 
+    function GetMovieExplain($movies)
+    {
+        $user = Auth::user();
+        $client = new Client();
+        $apikey = "e9678255150ea732f1e1c718fd75ed6d"; //TMDbのAPIキー
+        $requests = function ($total) use ($client, $apikey, $movies) {
+            foreach ($movies as $movie) {
+                yield function () use ($client, $movie, $apikey) {
+
+                    return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movie->movie_id . "?api_key=" . $apikey . "&language=ja&page=1&include_adult=false");
+                };
+            }
+        };
+        $explain = [];
+        $pool = new Pool($client, $requests(5), [
+            'concurrency' => 5,
+            'fulfilled' => function (ResponseInterface $response) use (&$explain, $user) {
+                if ($response != null) {
+                    $response = $response->getBody()->getContents();
+                    $contents = json_decode((string)$response, true);
+                    $explain[] = $contents;
+                }
+            },
+            'rejected' => function () {
+                var_dump("ng");
+            },
+        ]);
+        $promise = $pool->promise();
+        $promise->wait();
+        $requests = function ($total) use ($client, $explain) {
+            for ($i = 0; $i < $total; $i++) {
+                if (isset($explain[$i]['poster_path'])) {
+                    yield function () use ($client, $explain, $i) {
+
+                        return $client->requestAsync('GET', "https://image.tmdb.org/t/p/w185" . $explain[$i]['poster_path']);
+                    };
+                } else {
+                    $explain[$i]['imgtxt'] = '<img src="/img/noimage.png">';
+                }
+            }
+        };
+        $pool = new Pool($client, $requests(5), [
+            'concurrency' => 5,
+            'fulfilled' => function (ResponseInterface $response, $i) use (&$explain, $user) {
+                if ($response != null) {
+                    $response = $response->getBody()->getContents();
+                    $enc_img = base64_encode($response);
+                    $imginfo = getimagesize('data:application/octet-stream;base64,' . $enc_img);
+                    $explain[$i]['imgtxt'] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
+                }
+            },
+            'rejected' => function () {
+                var_dump("ng");
+            },
+        ]);
+
+        $promise = $pool->promise();
+        $promise->wait();
+        foreach ($movies as $movie) {
+            for ($i = 0; $i < count($explain); $i++) {
+                if ($movie->movie_id == $explain[$i]['id']) {
+                    $movie->explain = $explain[$i];
+                    break;
+                }
+            }
+        }
+
+        return $movies;
+    }
+    
     function ReturnMovieData($apikey, $genres, $config, $page)
     {
         $string = null;
@@ -378,75 +391,8 @@ class APIController extends Controller
         return $movies;
     }
 
-    function WatchedMovieViewInsertExplain($movies)
-    {
-        $user = Auth::user();
-        $client = new Client();
-        $apikey = "e9678255150ea732f1e1c718fd75ed6d"; //TMDbのAPIキー
-        $requests = function ($total) use ($client, $apikey, $movies) {
-            $i = 0;
-            foreach ($movies as $movie) {
-                yield function () use ($client, $movie, $apikey) {
 
-                    return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movie->movie_id . "?api_key=" . $apikey . "&language=ja&page=1&include_adult=false");
-                };
-            }
-        };
-        $explain = [];
-        $pool = new Pool($client, $requests(5), [
-            'concurrency' => 5,
-            'fulfilled' => function (ResponseInterface $response) use (&$explain, $user) {
-                if ($response != null) {
-                    $response = $response->getBody()->getContents();
-                    $contents = json_decode((string)$response, true);
-                    $explain[] = $contents;
-                }
-            },
-            'rejected' => function () {
-                var_dump("ng");
-            },
-        ]);
-        $promise = $pool->promise();
-        $promise->wait();
-        $requests = function ($total) use ($client, $explain) {
-            for ($i = 0; $i < $total; $i++) {
-                if (isset($explain[$i]['poster_path'])) {
-                    yield function () use ($client, $explain, $i) {
 
-                        return $client->requestAsync('GET', "https://image.tmdb.org/t/p/w185" . $explain[$i]['poster_path']);
-                    };
-                } else {
-                    $explain[$i]['imgtxt'] = '<img src="/img/noimage.png">';
-                }
-            }
-        };
-        $pool = new Pool($client, $requests(5), [
-            'concurrency' => 5,
-            'fulfilled' => function (ResponseInterface $response, $i) use (&$explain, $user) {
-                if ($response != null) {
-                    $response = $response->getBody()->getContents();
-                    $enc_img = base64_encode($response);
-                    $imginfo = getimagesize('data:application/octet-stream;base64,' . $enc_img);
-                    $explain[$i]['imgtxt'] = '<img src="data:' . $imginfo['mime'] . ';base64,' . $enc_img . '">';
-                }
-            },
-            'rejected' => function () {
-                var_dump("ng");
-            },
-        ]);
-
-        $promise = $pool->promise();
-        $promise->wait();
-        foreach ($movies as $movie) {
-            for ($i = 0; $i < count($explain); $i++) {
-                if ($movie->movie_id == $explain[$i]['id']) {
-                    $movie->explain = $explain[$i];
-                    break;
-                }
-            }
-        }
-        return $movies;
-    }
     // function WatchedMovieView()
     // {
     //     $error = null;

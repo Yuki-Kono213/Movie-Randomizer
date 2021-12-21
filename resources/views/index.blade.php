@@ -105,47 +105,47 @@
 
                     <div id="movie">
 
-                        @if ($explain != null && $explain[0] != 'なし')
-                            @for ($i = 0; $i < count($explain); $i++)
+                        @if ($movies != null)
+                            @foreach ($movies as $movie)
 
                                 @csrf
                                 <?php
-                                echo $explain[$i]['imgtxt'];
+                                echo $movie['explain']['imgtxt'];
                                 ?>
 
-                                <div class="alert alert-success" role="alert">{{ $explain[$i]['title'] }}</div>
+                                <div class="alert alert-success" role="alert">{{ $movie['explain']['title'] }}</div>
                                 <span class="alert alert-success"
-                                    role="alert">平均評価{{ $explain[$i]['vote_average'] }}</span>
+                                    role="alert">平均評価{{ $movie['explain']['vote_average'] }}</span>
                                 <span class="alert alert-success"
-                                    role="alert">上映年{{ $explain[$i]['release_date'] }}</span>
-                                <div class="alert alert-success" role="alert">上映時間{{ $explain[$i]['runtime'] }}分
+                                    role="alert">上映年{{ $movie['explain']['release_date'] }}</span>
+                                <div class="alert alert-success" role="alert">上映時間{{ $movie['explain']['runtime'] }}分
                                 </div>
                                 <span class="alert alert-success"
-                                    role="alert">評価数{{ $explain[$i]['vote_count'] }}</span>
-                                <input type="hidden" name="movie_id" value="{{ $explain[$i]['id'] }}">
+                                    role="alert">評価数{{ $movie['explain']['vote_count'] }}</span>
+                                <input type="hidden" name="movie_id" value="{{ $movie['explain']['id'] }}">
                                 @if ($user != null)
-                                    @if (isset($explain[$i]['rate']))
+                                    @if (isset($movie['explain']['rate']))
                                         <span class="alert alert-success" role="alert">あなたの評価
-                                            {{ $explain[$i]['rate'] }}
+                                            {{ $movie['explain']['rate'] }}
                                         @else
                                             <label>
                                                 <input type="checkbox" class="cb" name="category[]"
-                                                    value="{{ $explain[$i]['id'] }}">
+                                                    value="{{ $movie['explain']['id'] }}">
                                                 <span> 視聴する</span></label>
                                     @endif
                                     </span>
                                 @endif
-                                <div class="alert alert-success" role="alert">{{ $explain[$i]['overview'] }}</div>
+                                <div class="alert alert-success" role="alert">{{ $movie['explain']['overview'] }}</div>
 
-                            @endfor
-                        @elseif ($explain != null && $explain[0] == "なし")
+                            @endforeach
+                        @elseif ($movies == null)
                             映画が見つかりませんでした。
                         @elseif ($error)
                             <div class="alert alert-danger" role="alert">
                                 {{ $error }}
                             </div>;
                         @endif
-                        @if ($explain != null && $explain[0] != 'なし')
+                        @if ($movies != null)
                             <input type="submit" class="btn btn-primary" name="btn-Add" value="チェックした映画を視聴リストに追加">
                         @endif
 
