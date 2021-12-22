@@ -146,7 +146,7 @@
                                 {{ $error }}
                             </div>;
                         @endif
-                        @if (isset($user))
+                        @if (isset($user) && $movies != null)
                             <input type="submit" class="btn btn-primary" name="btn-Add" value="チェックした映画を視聴リストに追加">
                         @endif
 
