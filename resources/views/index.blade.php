@@ -86,7 +86,7 @@
                                 class="text-sm text-gray-700 dark:text-gray-500 underline">評価した映画を表示</a>
                         @endif
                     </div>
-                    @if (Route::has('register'))
+                    @if (Route::has('register') && $user == null)
                         <a href="{{ route('register') }}"
                             class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">登録</a>
                     @endif
