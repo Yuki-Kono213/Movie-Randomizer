@@ -63,6 +63,7 @@
                             <div>レビュー投稿数</div>
                             <input type="text" class="form-control" name="min_vote_count" id="min_vote_count"
                                 placeholder="最小レビュー数" value={{ $config['min_vote_count'] }}>
+                                <input type="hidden" name="push" value="true">
                     </fieldset>
                     <div>候補数</div>
                     <select name='count'>
@@ -138,14 +139,14 @@
                                 <div class="alert alert-success" role="alert">{{ $movie['explain']['overview'] }}</div>
 
                             @endforeach
-                        @elseif ($movies == null)
+                        @elseif (!$config['exist'])
                             映画が見つかりませんでした。
                         @elseif ($error)
                             <div class="alert alert-danger" role="alert">
                                 {{ $error }}
                             </div>;
                         @endif
-                        @if ($movies != null)
+                        @if (isset($user))
                             <input type="submit" class="btn btn-primary" name="btn-Add" value="チェックした映画を視聴リストに追加">
                         @endif
 
