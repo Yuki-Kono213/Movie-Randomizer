@@ -51,9 +51,16 @@ class APIController extends Controller
     }
     public function Sort_updated()
     {
-        return view('watched_movie', [
-            'movies' => $this->PassSort_updated()
-        ]);
+        $movies = $this->PassSort_updated();
+        if(count($movies) > 0){
+            return view('watched_movie', [
+                'movies' => $movies
+            ]);
+        }
+        else
+        {    
+            return redirect('/');
+        }
     }
     public function PassSort_updated()
     {
@@ -71,7 +78,7 @@ class APIController extends Controller
         }
         $movies = $this->WatchedMovieView();
         $movies = $this->GetMovieExplain($movies);
-        return redirect('watched_movie')->with([
+        return redirect('watched_movie/updated')->with([
             'movies' => $movies
         ]);
     }
