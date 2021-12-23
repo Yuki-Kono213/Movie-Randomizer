@@ -475,7 +475,7 @@ class APIController extends Controller
         $array[] = 0;
         $array[] = 0;
         $array[] = 0;
-        return;
+        return $array;
     }
     function totalResultsRandomizer($min, $totalResults)
     {
