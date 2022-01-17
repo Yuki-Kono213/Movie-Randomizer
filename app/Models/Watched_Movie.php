@@ -61,6 +61,15 @@ class Watched_Movie extends Model
         //dd($rate['original']['movie_rate']);
     }
 
+    public static function DeleteWatchedMovie($user_id, $movie_id)
+    {
+        $items = Watched_Movie::where('user_id' , $user_id)->where('movie_id' , $movie_id)->get();
+        foreach ($items as $item) {
+            $item->delete();
+        }
+        //dd($rate['original']['movie_rate']);
+    }
+
     public static function addWatchedMovieRate($user_id, $movie_id, $movie_rate)
     {
         Watched_Movie::create(['user_id' => $user_id, 'movie_id' => $movie_id, 'movie_rate' => $movie_rate]);

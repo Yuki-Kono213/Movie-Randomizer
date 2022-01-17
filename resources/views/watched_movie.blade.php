@@ -68,6 +68,7 @@
                                                 10</option>
                                         </select>
                                         <input type="submit" class="btn btn-primary" name="btn-Renew" value="更新">
+                                        <input type="submit" class="btn btn-primary" name="btn-Delete" value="削除">
 
                                     @else
                                         <select name='rate'>

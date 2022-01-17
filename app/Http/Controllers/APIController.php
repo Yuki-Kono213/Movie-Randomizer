@@ -31,6 +31,16 @@ class APIController extends Controller
                 ]);
             }
         }
+        elseif ($request->has('btn-Delete')) {
+
+            $this->DeleteDataBase();
+
+            if ($request->input('order') == 'rate') {
+                return view('watched_movie', [
+                    'movies' => $this->PassSort_rate()
+                ]);
+            }
+        }
         return view('/watched_movie', [
             'movies' => $this->PassSort_updated()
         ]);
@@ -363,6 +373,11 @@ class APIController extends Controller
     {
         $user = Auth::user();
         Watched_Movie::renewWatchedMovieRate($user->id, $_POST['movie_id'], $_POST['rate']);
+    }
+    function DeleteDataBase()
+    {
+        $user = Auth::user();
+        Watched_Movie::DeleteWatchedMovie($user->id, $_POST['movie_id']);
     }
     function WatchedMovieView()
     {
