@@ -103,7 +103,7 @@ class APIController extends Controller
         // $client = new Client(['debug' => true]); //通信内容をデバッグしたい場合
         $apikey = "e9678255150ea732f1e1c718fd75ed6d"; //TMDbのAPIキー
         $error = "";
-        $movieArray = [];
+        $moviearray = [];
         $bodies = [];
         $explain = [];
         $config = [];
@@ -125,10 +125,10 @@ class APIController extends Controller
                 }
             }
             $url_Contents =  $client->request('GET', $this->ReturnMovieData($apikey, $genres, $config, 1));
-            $PageArray = json_decode($url_Contents->getBody()->getContents(), true);
-            $totalResults = $PageArray['total_results'];
+            $pagearray = json_decode($url_Contents->getBody()->getContents(), true);
+            $totalResults = $pagearray['total_results'];
 
-            $pageRnd = [];
+            $pagernd = [];
 
             if ($totalResults == 0) {
                 $movies = null;
@@ -142,22 +142,22 @@ class APIController extends Controller
                     'rate' => $rate
                 ];
             }
-            $pageRnd = $this->totalResultsRandomizer(0, $totalResults - 1);
-            $firstrequests = function () use ($client, $apikey, $genres, $config, $pageRnd) {
+            $pagernd = $this->totalResultsRandomizer(0, $totalResults - 1);
+            $firstrequests = function () use ($client, $apikey, $genres, $config, $pagernd) {
                 for ($i = 1; $i <=  $_GET['count']; $i++) {
-                    if ($i <= count($pageRnd)) {
-                        yield function () use ($client, $apikey, $i,  $genres, $config, $pageRnd) {
-                            return $client->requestAsync('GET', $this->ReturnMovieData($apikey, $genres, $config, (((int)$pageRnd[$i - 1] + 20) / 20)));
+                    if ($i <= count($pagernd)) {
+                        yield function () use ($client, $apikey, $i,  $genres, $config, $pagernd) {
+                            return $client->requestAsync('GET', $this->ReturnMovieData($apikey, $genres, $config, (((int)$pagernd[$i - 1] + 20) / 20)));
                         };
                     }
                 }
             };
             $firstpool = new Pool($client, $firstrequests(5),  [
                 'concurrency' => $_GET['count'],
-                'fulfilled' => function (ResponseInterface $response) use (&$movieArray) {
+                'fulfilled' => function (ResponseInterface $response) use (&$moviearray) {
                     $contents = $response->getBody()->getContents();
-                    $pageArray = json_decode((string)$contents, true);
-                    $movieArray[$pageArray['page'] - 1] = $pageArray;
+                    $pagearray = json_decode((string)$contents, true);
+                    $moviearray[$pagearray['page'] - 1] = $pagearray;
                 },
                 'rejected' => function () {
                     var_dump("ng");
@@ -167,13 +167,13 @@ class APIController extends Controller
             $promise->wait();
             $find = 0;
             $movies = [];
-            $requests = function ($total) use ($client, $config, $pageRnd, $movieArray, $apikey, &$find) {
+            $requests = function ($total) use ($client, $config, $pagernd, $moviearray, $apikey, &$find) {
 
                 for ($i = 0; $i < $total; $i++) {
-                    if ($i < count($pageRnd) && $find < $config['count'] && $find < $total && $i < $total) {
-                        $page = $pageRnd[$i];
-                        yield function () use ($client, $apikey, $movieArray, $page) {
-                            return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $movieArray[$page / 20]['results'][$page % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
+                    if ($i < count($pagernd) && $find < $config['count'] && $find < $total && $i < $total) {
+                        $page = $pagernd[$i];
+                        yield function () use ($client, $apikey, $moviearray, $page) {
+                            return $client->requestAsync('GET', "https://api.themoviedb.org/3/movie/" . $moviearray[$page / 20]['results'][$page % 20]['id'] . "?api_key=" . $apikey . "&language=ja-JA");
                         };
                     }
                 }
@@ -184,9 +184,9 @@ class APIController extends Controller
                 'fulfilled' => function (ResponseInterface $response) use (&$bodies, &$find) {
                     if ($response != null) {
                         $contents = $response->getBody()->getContents();
-                        $pageArray = json_decode((string)$contents, true);
+                        $pagearray = json_decode((string)$contents, true);
                         $find++;
-                        $bodies[] = $pageArray;
+                        $bodies[] = $pagearray;
                     }
                 },
                 'rejected' => function () {
@@ -194,7 +194,7 @@ class APIController extends Controller
                 },
             ]);
             $promise = $pool->promise();
-            $movieArray = $bodies;
+            $moviearray = $bodies;
             $promise->wait();
 
             //var_dump($time = microtime(true) - $time_start);
@@ -397,29 +397,29 @@ class APIController extends Controller
 
     function ArrayReturn()
     {
-        $Array = [];
-        $Array[0] = "指定なし";
-        $Array[28] = "アクション";
-        $Array[12] = "アドベンチャー";
-        $Array[16] = "アニメーション";
-        $Array[35] = "コメディ";
-        $Array[80] = "犯罪";
-        $Array[99] = "ドキュメンタリー";
-        $Array[18] = "ドラマ";
-        $Array[10751] = "ファミリー";
-        $Array[14] = "ファンタジー";
-        $Array[36] = "歴史";
-        $Array[27] = "ホラー";
-        $Array[10402] = "ミュージック";
-        $Array[9648] = "ミステリー";
-        $Array[10749] = "ロマンス";
-        $Array[878] = "SF";
-        $Array[10770] = "TV映画";
-        $Array[53] = "スリラー";
-        $Array[10752] = "戦争";
-        $Array[37] = "西部劇";
+        $array = [];
+        $array[0] = "指定なし";
+        $array[28] = "アクション";
+        $array[12] = "アドベンチャー";
+        $array[16] = "アニメーション";
+        $array[35] = "コメディ";
+        $array[80] = "犯罪";
+        $array[99] = "ドキュメンタリー";
+        $array[18] = "ドラマ";
+        $array[10751] = "ファミリー";
+        $array[14] = "ファンタジー";
+        $array[36] = "歴史";
+        $array[27] = "ホラー";
+        $array[10402] = "ミュージック";
+        $array[9648] = "ミステリー";
+        $array[10749] = "ロマンス";
+        $array[878] = "SF";
+        $array[10770] = "TV映画";
+        $array[53] = "スリラー";
+        $array[10752] = "戦争";
+        $array[37] = "西部劇";
 
-        return $Array;
+        return $array;
     }
     function ReturnSelectedIndex($value)
     {
@@ -492,12 +492,12 @@ class APIController extends Controller
         $array[] = 0;
         return $array;
     }
-    function totalResultsRandomizer($min, $totalResults)
+    function totalResultsRandomizer($min, $totalresults)
     {
         /** 乱数用配列 */
         $rands = [];
         /** 乱数の範囲は1～10 */
-        $max = $totalResults;
+        $max = $totalresults;
 
         for ($i = $min; $i <= $max; $i++) {
             while (true) {
