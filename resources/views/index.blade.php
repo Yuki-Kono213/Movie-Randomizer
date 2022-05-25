@@ -65,7 +65,7 @@
                                 placeholder="最小レビュー数" value={{ $config['min_vote_count'] }}>
                                 <input type="hidden" name="push" value="true">
                     </fieldset>
-                    <div>候補数</div>
+                    <div>表示数</div>
                     <select name='count'>
                         <option value='1' <?= $config['count'] == 1 ? 'selected' : '' ?>>1</option>
                         <option value='2' <?= $config['count'] == 2 ? 'selected' : '' ?>>2</option>

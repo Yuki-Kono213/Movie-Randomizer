@@ -124,13 +124,21 @@ class APIController extends Controller
                     $selectedvalue[$i] = $_GET['genre' . $i];
                 }
             }
+            
+        if(!$config['exist'])
+        {
+            return view('index', [
+                'error' => $error, 'movies' => null,
+                'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user
+            ]);
+        }
             $url_Contents =  $client->request('GET', $this->ReturnMovieData($apikey, $genres, $config, 1));
             $pagearray = json_decode($url_Contents->getBody()->getContents(), true);
             $totalResults = $pagearray['total_results'];
 
             $pagernd = [];
 
-            if ($totalResults == 0) {
+            if ($totalResults == 0 ) {
                 $movies = null;
 
                 $config['minimum_vote'] = $_GET['minimum_vote'];
@@ -346,7 +354,24 @@ class APIController extends Controller
         if (array_key_exists('count', $_GET) && $_GET['count'] != "") {
             $config['count'] = $_GET['count'];
         }
-        $config['exist'] = true;
+        if($config['max_age'] == $config['minimum_age'])
+        {
+            $config['exist'] = false;
+
+        }
+        else if($config['max_vote'] == $config['minimum_vote'])
+        {
+            $config['exist'] = false;
+        }
+        else if($config['max_time'] == $config['minimum_time'])
+        {
+            $config['exist'] = false;
+        }
+        else
+        {
+            $config['exist'] = true;
+
+        }
         return $config;
     }
 
