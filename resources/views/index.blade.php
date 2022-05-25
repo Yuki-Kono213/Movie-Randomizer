@@ -30,8 +30,10 @@
                             <div>上映時間</div>
                             <input type="text" class="form-control" name="minimum_time" id="minimum_time"
                                 placeholder="最小上映時間" value={{ $config['minimum_time'] }}>
+                                <span>分～</span>
                             <input type="text" class="form-control" name="max_time" id="max_time" placeholder="最長上映時間"
                                 value={{ $config['max_time'] }}>
+                                <span>分</span>
                             <div>ジャンル</div>
                             @for ($i = 0; $i < 3; $i++)
                                 <select id="genre{{ $i }}" name="genre{{ $i }}">
@@ -53,8 +55,10 @@
                             <div>上映年</div>
                             <input type="text" class="form-control" name="minimum_age" id="minimum_age"
                                 placeholder="最小上映年" value={{ $config['minimum_age'] }}>
+                                <span>年～</span>
                             <input type="text" class="form-control" name="max_age" id="max_age" placeholder="最大上映年"
                                 value={{ $config['max_age'] }}>
+                                <span>年</span>
                             <div>評価</div>
                             <input type="text" class="form-control" name="minimum_vote" id="minimum_vote"
                                 placeholder="最小評価" value={{ $config['minimum_vote'] }}>
