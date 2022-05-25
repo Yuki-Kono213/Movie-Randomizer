@@ -57,7 +57,7 @@
                                 placeholder="最小上映年" value={{ $config['minimum_age'] }}>
                                 <span>年～</span>
                             <input type="text" class="form-control" name="max_age" id="max_age" placeholder="最大上映年"
-                                value={{ $config['max_age'] }}>
+                                value={{ $config['max_age'] - 1 }}>
                                 <span>年</span>
                             <div>評価</div>
                             <input type="text" class="form-control" name="minimum_vote" id="minimum_vote"

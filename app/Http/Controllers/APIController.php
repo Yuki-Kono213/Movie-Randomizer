@@ -321,7 +321,7 @@ class APIController extends Controller
         $config['minimum_time'] = 0;
         $config['max_time']  = 180;
         $config['minimum_age']  = 1990;
-        $config['max_age']  = date('Y');
+        $config['max_age']  = date('Y') + 1;
         $config['minimum_vote']  = 70;
         $config['max_vote'] = 100;
         $config['min_vote_count'] = 100;
@@ -338,7 +338,7 @@ class APIController extends Controller
         }
 
         if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "") {
-            $config['max_age'] = $_GET['max_age'];
+            $config['max_age'] = $_GET['max_age'] + 1;
         }
         if (array_key_exists('minimum_vote', $_GET) && $_GET['minimum_vote'] != "") {
             $config['minimum_vote'] = $_GET['minimum_vote'];
