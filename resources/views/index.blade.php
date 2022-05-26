@@ -62,8 +62,11 @@
                             <div>評価</div>
                             <input type="text" class="form-control" name="minimum_vote" id="minimum_vote"
                                 placeholder="最小評価" value={{ $config['minimum_vote'] }}>
+                                <span>～</span>
                             <input type="text" class="form-control" name="max_vote" id="max_vote" placeholder="最大評価"
                                 value={{ $config['max_vote'] }}>
+                                <div>※最大評価と最小評価は別の値を入力してください。</div>
+                                <br>
                             <div>レビュー投稿数</div>
                             <input type="text" class="form-control" name="min_vote_count" id="min_vote_count"
                                 placeholder="最小レビュー数" value={{ $config['min_vote_count'] }}>
