@@ -84,14 +84,21 @@ class APIController extends Controller
     public function PostWatchedMovieView(Request $request)
     {
         $watchmovies = $request->input('category');
-        foreach ($watchmovies as $watchmovie) {
-            $this->AddDataBase($watchmovie);
+        if($watchmovies != null){
+            foreach ($watchmovies as $watchmovie) {
+                $this->AddDataBase($watchmovie);
+            }
+            $movies = $this->WatchedMovieView();
+            $movies = $this->GetMovieExplain($movies);
+            return redirect('watched_movie/updated')->with([
+                'movies' => $movies
+            ]);
         }
-        $movies = $this->WatchedMovieView();
-        $movies = $this->GetMovieExplain($movies);
-        return redirect('watched_movie/updated')->with([
-            'movies' => $movies
-        ]);
+        else
+        {
+            return redirect('watched_movie/updated');
+
+        }
     }
 
     function index()
