@@ -15,6 +15,7 @@ use App\Models\Watched_Movie;
 use Illuminate\Support\Facades\DB;
 use stdClass;
 use Illuminate\Support\Collection;
+use Ramsey\Uuid\Type\Integer;
 
 class APIController extends Controller
 {
@@ -354,16 +355,20 @@ class APIController extends Controller
         if (array_key_exists('count', $_GET) && $_GET['count'] != "") {
             $config['count'] = $_GET['count'];
         }
-        if($config['max_age'] == $config['minimum_age'])
+        if($config['max_age'] == $config['minimum_age'] || !is_numeric($config['max_age']) || !is_numeric(($config['minimum_age'])))
         {
             $config['exist'] = false;
 
         }
-        else if($config['max_vote'] == $config['minimum_vote'])
+        else if($config['max_vote'] == $config['minimum_vote'] || !is_numeric($config['max_vote']) || !is_numeric($config['minimum_vote']) )
         {
             $config['exist'] = false;
         }
-        else if($config['max_time'] == $config['minimum_time'])
+        else if($config['max_time'] == $config['minimum_time'] || !is_numeric($config['max_time'])  || !is_numeric($config['minimum_time']) )
+        {
+            $config['exist'] = false;
+        }
+        else if(!is_numeric($config['min_vote_count']))
         {
             $config['exist'] = false;
         }
