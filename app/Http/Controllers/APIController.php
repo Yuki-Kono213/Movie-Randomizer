@@ -141,15 +141,15 @@ class APIController extends Controller
 
             if ($totalResults == 0 ) {
                 $movies = null;
-
+                $config['exist'] = false;
                 $config['minimum_vote'] = $_GET['minimum_vote'];
                 $config['max_vote'] = $_GET['max_vote'];
 
-                return [
-                    'error' => $error, 'explain' => $explain,
-                    'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user,
-                    'rate' => $rate
-                ];
+                
+            return view('index', [
+                'error' => $error, 'movies' => null,
+                'selectedvalue' => $selectedvalue, 'genreArray' => $genresArray, 'config' => $config, 'user' => $user
+            ]);
             }
             $pagernd = $this->totalResultsRandomizer(0, $totalResults - 1);
             $firstrequests = function () use ($client, $apikey, $genres, $config, $pagernd) {
@@ -338,7 +338,7 @@ class APIController extends Controller
             $config['minimum_age'] = $_GET['minimum_age'];
         }
 
-        if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "" && is_numeric( $_GET['max_age'] )) {
+        if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != ""&& is_numeric( $_GET['max_age'] )) {
             $config['max_age'] = $_GET['max_age'] + 1;
         }
         if (array_key_exists('minimum_vote', $_GET) && $_GET['minimum_vote'] != "") {
