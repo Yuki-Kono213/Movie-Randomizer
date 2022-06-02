@@ -334,11 +334,11 @@ class APIController extends Controller
         if (array_key_exists('max_time', $_GET) && $_GET['max_time'] != "") {
             $config['max_time'] = $_GET['max_time'];
         }
-        if (array_key_exists('minimum_age', $_GET) && $_GET['minimum_age'] != "") {
+        if (array_key_exists('minimum_age', $_GET) && $_GET['minimum_age'] != "" ) {
             $config['minimum_age'] = $_GET['minimum_age'];
         }
 
-        if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "") {
+        if (array_key_exists('max_age', $_GET) && $_GET['max_age'] != "" && is_numeric( $_GET['max_age'] )) {
             $config['max_age'] = $_GET['max_age'] + 1;
         }
         if (array_key_exists('minimum_vote', $_GET) && $_GET['minimum_vote'] != "") {
