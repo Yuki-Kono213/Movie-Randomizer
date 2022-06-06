@@ -34,7 +34,10 @@
                             <input type="text" class="form-control" name="max_time" id="max_time" placeholder="最長上映時間"
                                 value={{ $config['max_time'] }}>
                                 <span>分</span>
-                            <div>APIの仕様上、映画の他言語での上映時間が<br>上映時間範囲内でも検索結果に表示されます。</div>
+                            <div>※APIの仕様上、表示される上映時間が範囲外でも、<br>
+                                映画の他言語での上映時間が<br>
+                                上映時間範囲内なら検索結果に表示されます。
+                            </div>
                             <div>ジャンル</div>
                             @for ($i = 0; $i < 3; $i++)
                                 <select id="genre{{ $i }}" name="genre{{ $i }}">
